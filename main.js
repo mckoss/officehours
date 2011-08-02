@@ -6,9 +6,6 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     var currentYear = 2011;
     var wholeDoc = namespace.lookup('com.pageforest.officehours.sample-data').wholeDoc;
 
-
-    var location = "StartPad";
-
     function onReady() {
         // Client library for Pageforest
         client = new clientLib.Client(ns);
@@ -21,7 +18,6 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     function setDoc(stuff) {
         //client.log("stuff:" + stuff);
         $('#location-name').text(wholeDoc.title);
-        var sessions = getSessions(location);
 
         updatePages();
         //sessionBuilder(sessions);
@@ -648,45 +644,6 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     function setDocid() {
 
     }
-
-    // Stub to get data from pageforest
-    function getSessions(location) {
-        var json =
-            [
-                {
-                    id: "cwkoss-123",
-                    title: "Using JQTouch for Mobile Apps",
-                    description: "This is a great session where you will learn lots of stuff about JQTouch.",
-                    provider: "cwkoss",
-                    date: new Date("1/1/2011"),
-                    time: 11,
-                    reservation: ["Available" , "mckoss", "bobby", "Available"]
-                },
-                {
-                    id: "bobby-124",
-                    title: "pwning Friends at Quoridor",
-                    description: "Quoridor is a game that is most fun when you make your friends most frustrated.",
-                    provider: "bobby",
-                    date: new Date("1/11/2011"),
-                    time: 15,
-                    reservation: ["cwkoss" , "mckoss" , "Cancelled" , "Cancelled"]
-                },
-                {
-                    id: "mckoss-8977",
-                    title: "Angry Birds as Stress Relief",
-                    description: "Get the pigs!  They have taken our eggs! Learn about angles and when to tap the screen.",
-                    provider: "mckoss",
-                    date: new Date("1/15/2011"),
-                    time: 14,
-                    reservation: ["Available" , "Available" , "bobby" , "cwkoss"]
-                }
-            ];
-        return json;
-    }
-
-
-
-
 
     function userToFullname(username) {
         for (var key in wholeDoc.blob.users) {
