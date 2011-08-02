@@ -14,26 +14,19 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         //$('#newSession').submit(onNewSession);
     }
 
-
     function setDoc(stuff) {
         //client.log("stuff:" + stuff);
         $('#location-name').text(wholeDoc.title);
 
         updatePages();
         //sessionBuilder(sessions);
-
-        myAppointments(sessions);
-
-
     }
-
 
     function getDoc() {
         return wholeDoc;
     }
 
     var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
 
     /*  updatePages()
         Calls for a page to be built for each instance of each schema.
@@ -47,10 +40,11 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         for (var schema in wholeDoc.blob) {
             if (schema != "instructions") {
                 for (var key in wholeDoc.blob[schema]) {
-                    buildPage("" + schema, key);
+                    buildPage(schema, key);
                     var owner = wholeDoc.blob.instructions[schema].settings.owner;
+                    // TODO: App specific code
                     if (wholeDoc.blob[schema][key][owner] == client.username && schema != "reservations")
-                        buildPage("" + schema, key, "edit");
+                        buildPage(schema, key, "edit");
                 }
             }
         }
