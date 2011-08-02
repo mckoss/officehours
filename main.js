@@ -7,244 +7,244 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
 
 
     var wholeDoc = {
-            title: "StartPad",
-            blob: {
-                //address: "811 First Ave\nSuite 480\nSeattle, WA 98104",
-                //phone: "(206) 388-3466",
-                sessions:   {
-                            "cwkoss-123": {
-                                                id: "cwkoss-123",
-                                                title: "Using JQTouch for Mobile Apps",
-                                                description: "This is a great session where you will learn lots of stuff about JQTouch.",
-                                                provider: "cwkoss",
-                                                date: new Date(2011, 10, 1),
-                                                time: 11, 
-                                                "reservation-0": "cwkoss-123-0",
-                                                "reservation-1": "cwkoss-123-1",
-                                                "reservation-2": "cwkoss-123-2",
-                                                "reservation-3": "cwkoss-123-3"
-                                            },
-                            "bobby-124":    {
-                                                id: "bobby-124",
-                                                title: "pwning Friends at Quoridor",
-                                                description: "Quoridor is a game that is most fun when you make your friends most frustrated.",
-                                                provider: "bobby",
-                                                date: new Date(2011, 2, 22),
-                                                time: 15,
-                                                "reservation-0": "bobby-124-0",
-                                                "reservation-1": "bobby-124-1",
-                                                "reservation-2": "bobby-124-2",
-                                                "reservation-3": "bobby-124-3"
-                                            },
-                            "mckoss-8977":  {
-                                                id: "mckoss-8977",
-                                                title: "Angry Birds as Stress Relief",
-                                                description: "Get the pigs!  They have taken our eggs! Learn about angles and when to tap the screen.",
-                                                provider: "mckoss",
-                                                date: new Date(2011, 5, 6),
-                                                time: 14,
-                                                "reservation-0": "mckoss-8977-0",
-                                                "reservation-1": "mckoss-8977-1",
-                                                "reservation-2": "mckoss-8977-2",
-                                                "reservation-3": "mckoss-8977-3"
-                                            }
+        title: "StartPad",
+        blob: {
+            //address: "811 First Ave\nSuite 480\nSeattle, WA 98104",
+            //phone: "(206) 388-3466",
+            sessions:   {
+                "cwkoss-123": {
+                    id: "cwkoss-123",
+                    title: "Using JQTouch for Mobile Apps",
+                    description: "This is a great session where you will learn lots of stuff about JQTouch.",
+                    provider: "cwkoss",
+                    date: new Date(2011, 10, 1),
+                    time: 11,
+                    "reservation-0": "cwkoss-123-0",
+                    "reservation-1": "cwkoss-123-1",
+                    "reservation-2": "cwkoss-123-2",
+                    "reservation-3": "cwkoss-123-3"
+                },
+                "bobby-124":    {
+                    id: "bobby-124",
+                    title: "pwning Friends at Quoridor",
+                    description: "Quoridor is a game that is most fun when you make your friends most frustrated.",
+                    provider: "bobby",
+                    date: new Date(2011, 2, 22),
+                    time: 15,
+                    "reservation-0": "bobby-124-0",
+                    "reservation-1": "bobby-124-1",
+                    "reservation-2": "bobby-124-2",
+                    "reservation-3": "bobby-124-3"
+                },
+                "mckoss-8977":  {
+                    id: "mckoss-8977",
+                    title: "Angry Birds as Stress Relief",
+                    description: "Get the pigs!  They have taken our eggs! Learn about angles and when to tap the screen.",
+                    provider: "mckoss",
+                    date: new Date(2011, 5, 6),
+                    time: 14,
+                    "reservation-0": "mckoss-8977-0",
+                    "reservation-1": "mckoss-8977-1",
+                    "reservation-2": "mckoss-8977-2",
+                    "reservation-3": "mckoss-8977-3"
+                }
+            },
+            users:      {
+                "cwkoss":{
+                    username: "cwkoss",
+                    fullname: "Chris Koss",
+                    phone: "425-246-7703",
+                    email: "chris@mckoss.com"
+                },
+                "bobby":{
+                    username: "bobby",
+                    fullname: "Bobby Seidensticker",
+                    phone: "425-555-1234",
+                    email: "bobby@mckoss.com"
+                },
+                "mckoss":{
+                    username: "mckoss",
+                    fullname: "Mike Koss",
+                    phone: "425-246-7701",
+                    email: "mike@mckoss.com"
+                }
+            },
+            reservations: { "cwkoss-123-0": {status: "Available", time: "11 :00AM - 11:30AM", parent:"cwkoss-123", owner: "cwkoss"},
+                            "cwkoss-123-1": {status: "mckoss", time: "11:30AM - 12:00PM", parent:"cwkoss-123", owner: "cwkoss"},
+                            "cwkoss-123-2": {status: "bobby", time: "12:00PM - 12:30PM", parent:"cwkoss-123", owner: "cwkoss"},
+                            "cwkoss-123-3": {status: "Available", time: "12:30PM - 1:00PM", parent:"cwkoss-123", owner: "cwkoss"},
+                            "bobby-124-0": {status: "cwkoss", time: "3:00PM - 3:30PM", parent:"bobby-124", owner: "bobby"},
+                            "bobby-124-1": {status: "mckoss", time: "3:30PM - 4:00PM", parent:"bobby-124", owner: "bobby"},
+                            "bobby-124-2": {status: "Cancelled", time: "4:00PM - 4:30PM", parent:"bobby-124", owner: "bobby"},
+                            "bobby-124-3": {status: "Cancelled", time: "4:30PM - 5:00PM", parent:"bobby-124", owner: "bobby"},
+                            "mckoss-8977-0": {status: "Available", time: "2:00PM - 2:30PM", parent:"mckoss-8977", owner: "mckoss"},
+                            "mckoss-8977-1": {status: "Available", time: "2:30PM - 3:00PM", parent:"mckoss-8977", owner: "mckoss"},
+                            "mckoss-8977-2": {status: "bobby", time: "3:00PM - 3:30PM", parent:"mckoss-8977", owner: "mckoss"},
+                            "mckoss-8977-3": {status: "cwkoss", time: "3:30PM - 4:00PM", parent:"mckoss-8977", owner: "mckoss"}
+                          },
+
+            instructions: {
+                sessions: {
+                    settings:{  owner: "provider",
+                                pageDisplay: [["toolbar", ["value", "title"], ["back"], ["condition", "owned", "edit"]],
+                                              ["ul", {"lines":["description", "provider", "date", "time"]}],
+                                              ["h2", "Schedule"],
+                                              ["ul", {"lines": ["reservation-0", "reservation-1", "reservation-2", "reservation-3"]}],
+                                              ["condition", "owned", ["button", "", ["delete", "sessions", "key"], "Delete this Office Hour"]]],
+                                pageEdit: [["toolbar", ["value", "title"], ["back", "Cancel"], ["save"]],
+                                           ["ul", {"lines":["description", "provider", "date", "time"]}]],
+
+
+                                lineDisplay: [['', '<br/>', ' - ', ' - '],
+                                              ["title", "provider", "date", "time"]]},
+                    attr:   [{
+                        fieldName: "Title",
+                        dataField: "title",
+                        dataType: "string",
+                        display: "h1text"
+                    },
+                             {
+                                 fieldName: "Description",
+                                 dataField: "description",
+                                 dataType: "textarea",
+                                 display: "nolabel"
                              },
-                users:      {
-                            "cwkoss":{
-                                    username: "cwkoss",
-                                    fullname: "Chris Koss",
-                                    phone: "425-246-7703",
-                                    email: "chris@mckoss.com"
-                                    },
-                            "bobby":{
-                                    username: "bobby",
-                                    fullname: "Bobby Seidensticker", 
-                                    phone: "425-555-1234",
-                                    email: "bobby@mckoss.com"
-                                 },
-                            "mckoss":{
-                                    username: "mckoss",
-                                    fullname: "Mike Koss",
-                                    phone: "425-246-7701",
-                                    email: "mike@mckoss.com"
-                                 } 
-                            },
-                reservations: { "cwkoss-123-0": {status: "Available", time: "11 :00AM - 11:30AM", parent:"cwkoss-123", owner: "cwkoss"},
-                                "cwkoss-123-1": {status: "mckoss", time: "11:30AM - 12:00PM", parent:"cwkoss-123", owner: "cwkoss"},
-                                "cwkoss-123-2": {status: "bobby", time: "12:00PM - 12:30PM", parent:"cwkoss-123", owner: "cwkoss"},
-                                "cwkoss-123-3": {status: "Available", time: "12:30PM - 1:00PM", parent:"cwkoss-123", owner: "cwkoss"},
-                                "bobby-124-0": {status: "cwkoss", time: "3:00PM - 3:30PM", parent:"bobby-124", owner: "bobby"},
-                                "bobby-124-1": {status: "mckoss", time: "3:30PM - 4:00PM", parent:"bobby-124", owner: "bobby"},
-                                "bobby-124-2": {status: "Cancelled", time: "4:00PM - 4:30PM", parent:"bobby-124", owner: "bobby"},
-                                "bobby-124-3": {status: "Cancelled", time: "4:30PM - 5:00PM", parent:"bobby-124", owner: "bobby"},
-                                "mckoss-8977-0": {status: "Available", time: "2:00PM - 2:30PM", parent:"mckoss-8977", owner: "mckoss"},
-                                "mckoss-8977-1": {status: "Available", time: "2:30PM - 3:00PM", parent:"mckoss-8977", owner: "mckoss"},
-                                "mckoss-8977-2": {status: "bobby", time: "3:00PM - 3:30PM", parent:"mckoss-8977", owner: "mckoss"},
-                                "mckoss-8977-3": {status: "cwkoss", time: "3:30PM - 4:00PM", parent:"mckoss-8977", owner: "mckoss"}
-                                },
+                             {
+                                 fieldName: "Provider",
+                                 dataField: "provider",
+                                 dataType: "users",
+                                 condition: " != client.username",
+                                 editable: false
+                             },
+                             {
+                                 fieldName: "Date",
+                                 dataField: "date",
+                                 dataType: "date",
+                                 evaluate: ""
+                             },
+                             {
+                                 fieldName: "Time",
+                                 dataField: "time",
+                                 dataType: "time"
+                             },
+                             {
+                                 fieldName: "Rez 0",
+                                 dataField: "reservation-0",
+                                 dataType: "reservations",
+                                 display: "nolabel"
+                             },
+                             {
+                                 fieldName: "Rez 1",
+                                 dataField: "reservation-1",
+                                 dataType: "reservations",
+                                 display: "nolabel"
+                             },
+                             {
+                                 fieldName: "Rez 2",
+                                 dataField: "reservation-2",
+                                 dataType: "reservations",
+                                 display: "nolabel"
+                             },
+                             {
+                                 fieldName: "Rez 3",
+                                 dataField: "reservation-3",
+                                 dataType: "reservations",
+                                 display: "nolabel"
+                             }]
+                },
 
-                instructions: {
-                                sessions: {
-                                            settings:{  owner: "provider",
-                                                        pageDisplay: [["toolbar", ["value", "title"], ["back"], ["condition", "owned", "edit"]],
-                                                                      ["ul", {"lines":["description", "provider", "date", "time"]}],
-                                                                      ["h2", "Schedule"],
-                                                                      ["ul", {"lines": ["reservation-0", "reservation-1", "reservation-2", "reservation-3"]}],
-                                                                      ["condition", "owned", ["button", "", ["delete", "sessions", "key"], "Delete this Office Hour"]]],     
-                                                        pageEdit: [["toolbar", ["value", "title"], ["back", "Cancel"], ["save"]],
-                                                                      ["ul", {"lines":["description", "provider", "date", "time"]}]],
+                users: {
+                    settings:{lineDisplay: [['<div style="float:right">', '</div>'], ["fullname"]],
+                              pageDisplay: [["toolbar", "Profile", ["back"], ["condition", "owned", "edit"]],
+                                            ["ul", {"lines": ["fullname", "phone", "email"]}],
+                                            ["condition", "owned", ["link", "myappt", "My Appointments"]]],
+                              pageEdit:  [["toolbar", "Profile", ["back"], ["save"]],
+                                          ["ul", {"lines": ["fullname", "phone", "email"]}]],
+                              owner: "username",
+                              lineEdit: []},
+                    attr:[{
+                        fieldName: "Name",
+                        dataField: "fullname",
+                        dataType: "string"
+                    },
+                          {
+                              fieldName: "Phone",
+                              dataField: "phone",
+                              dataType: "string"
+                          },
+                          {
+                              fieldName: "Email",
+                              dataField: "email",
+                              dataType: "string"
+                          },
+                          {
+                              fieldName: "Username",
+                              dataField: "username",
+                              dataType: "users",
+                              display: "nodisplay"
+                          }
+                         ]
+                },
+                reservations: {
+                    settings:{lineDisplay: [['<div style="float:left">', '</div>','<div style="float:right">', '</div>'], ["time", "", "status"]],
+                              pageDisplay: [["toolbar", "Reservation", ["back"]],
+                                            ["ul", {"lines": ["parent", "time", "status"]}],
+                                            ["condition", "rezreserver", ["button", "", ["set", "status", "client.username", ""], "Reserve This Session"]],
+                                            ["condition", "rezholder", ["button", "", ["set", "status", "\"Available\"", ""], "Cancel This Session"]],
+                                            ["condition", "rezcancancel", ["button", "", ["set", "status", "\"Cancelled\"", ""], "Cancel This Session"]],
+                                            ["condition", "rezcanuncancel", ["button", "", ["set", "status", "\"Available\"", ""], "Make Available"]]],
+                              owner: "owner",
+                              lineEdit: []},
+                    attr:[{
+                        fieldName: "Session",
+                        dataField: "parent",
+                        dataType: "sessions",
+                        display: "nolabel",
+                        linked: "nolink"
+                    },
+                          {
+                              fieldName: "Time",
+                              dataField: "time",
+                              dataType: "string"
+                          },
+                          {
+                              fieldName: "Status",
+                              dataField: "status",
+                              dataType: "string"
+                          },
+                          {
+                              fieldName: "owner",
+                              dataField: "owner",
+                              dataType: "users",
+                              display: "nodisplay"
+                          }
+                         ]
+                },
+                home: {
+                    settings:{type:"pageSpec",
+                              pageDisplay: [["toolbar", "Startpad", ["condition", "notsignedin", ["button", "", "signIn()", "Sign In"]], ["condition", "signedin", ["button", "client.username", "", "My Profile"]]],
+                                            ["h2", "Office Hours"],
+                                            ["ul" , {"lines": ["sessions", "all"]}],
+                                            ["condition", "signedin", ["button", "newSession", "", "Host an Office Hour"]]]
+                             }
+                },
+                condition: {
+                    signedin: "client.username != undefined",
+                    owned: "isOwned(arg[0],arg[1])",
+                    rezholder: "wholeDoc.blob.reservations[arg[1]].status == client.username",
+                    rezavailable: "wholeDoc.blob.reservations[arg[1]].status == 'Available'",
+                    rezcancelled: "wholeDoc.blob.reservations[arg[1]].status == 'Cancelled'",
+                    rezcanceller: "(wholeDoc.blob.reservations[arg[1]].status == client.username) || isOwned(arg[0],arg[1])",
+                    rezreserver: "(wholeDoc.blob.reservations[arg[1]].status == \"Available\") && (!isOwned(arg[0],arg[1]))",
+                    rezcancancel: "(wholeDoc.blob.reservations[arg[1]].status != 'Cancelled') && isOwned(arg[0],arg[1])",
+                    rezcanuncancel: "(wholeDoc.blob.reservations[arg[1]].status == 'Cancelled') && isOwned(arg[0],arg[1])"
+                }
 
-                                                                        
-                                                        lineDisplay: [['', '<br/>', ' - ', ' - '], 
-                                                        ["title", "provider", "date", "time"]]},                                            
-                                            attr:   [{
-                                                        fieldName: "Title",
-                                                        dataField: "title",
-                                                        dataType: "string",
-                                                        display: "h1text"                                               
-                                                     },
-                                                     {
-                                                        fieldName: "Description",
-                                                        dataField: "description",
-                                                        dataType: "textarea",
-                                                        display: "nolabel"                                              
-                                                     },
-                                                     {
-                                                        fieldName: "Provider",
-                                                        dataField: "provider",
-                                                        dataType: "users",
-                                                        condition: " != client.username",
-                                                        editable: false                                             
-                                                     },
-                                                     {
-                                                        fieldName: "Date",
-                                                        dataField: "date",
-                                                        dataType: "date",
-                                                        evaluate: ""                                                
-                                                     },
-                                                     {
-                                                        fieldName: "Time",
-                                                        dataField: "time",
-                                                        dataType: "time"                                                
-                                                     },
-                                                     {
-                                                        fieldName: "Rez 0",
-                                                        dataField: "reservation-0",
-                                                        dataType: "reservations",
-                                                        display: "nolabel"                                                  
-                                                     },
-                                                     {
-                                                        fieldName: "Rez 1",
-                                                        dataField: "reservation-1",
-                                                        dataType: "reservations",
-                                                        display: "nolabel"                                                  
-                                                     },
-                                                     {
-                                                        fieldName: "Rez 2",
-                                                        dataField: "reservation-2",
-                                                        dataType: "reservations",
-                                                        display: "nolabel"                                                  
-                                                     },
-                                                     {
-                                                        fieldName: "Rez 3",
-                                                        dataField: "reservation-3",
-                                                        dataType: "reservations",
-                                                        display: "nolabel"                                                  
-                                                     }]
-                                            },      
+            }}
 
-                                users: {
-                                        settings:{lineDisplay: [['<div style="float:right">', '</div>'], ["fullname"]],
-                                                    pageDisplay: [["toolbar", "Profile", ["back"], ["condition", "owned", "edit"]],
-                                                                    ["ul", {"lines": ["fullname", "phone", "email"]}],
-                                                                    ["condition", "owned", ["link", "myappt", "My Appointments"]]],   
-                                                    pageEdit:  [["toolbar", "Profile", ["back"], ["save"]],
-                                                                    ["ul", {"lines": ["fullname", "phone", "email"]}]],
-                                                    owner: "username",
-                                                    lineEdit: []},
-                                        attr:[{ 
-                                                fieldName: "Name",
-                                                dataField: "fullname",
-                                                dataType: "string"
-                                             },
-                                             {  
-                                                fieldName: "Phone",
-                                                dataField: "phone",
-                                                dataType: "string"
-                                             },
-                                             {  
-                                                fieldName: "Email",
-                                                dataField: "email",
-                                                dataType: "string"
-                                             },
-                                             {  
-                                                fieldName: "Username",
-                                                dataField: "username",
-                                                dataType: "users",
-                                                display: "nodisplay"
-                                             }
-                                            ]
-                                        },
-                                reservations: {
-                                        settings:{lineDisplay: [['<div style="float:left">', '</div>','<div style="float:right">', '</div>'], ["time", "", "status"]],
-                                                    pageDisplay: [["toolbar", "Reservation", ["back"]],
-                                                                    ["ul", {"lines": ["parent", "time", "status"]}],
-                                                                    ["condition", "rezreserver", ["button", "", ["set", "status", "client.username", ""], "Reserve This Session"]],
-                                                                    ["condition", "rezholder", ["button", "", ["set", "status", "\"Available\"", ""], "Cancel This Session"]],
-                                                                    ["condition", "rezcancancel", ["button", "", ["set", "status", "\"Cancelled\"", ""], "Cancel This Session"]],
-                                                                    ["condition", "rezcanuncancel", ["button", "", ["set", "status", "\"Available\"", ""], "Make Available"]]],
-                                                    owner: "owner",
-                                                    lineEdit: []},
-                                        attr:[{ 
-                                                fieldName: "Session",
-                                                dataField: "parent",
-                                                dataType: "sessions",
-                                                display: "nolabel",
-                                                linked: "nolink"
-                                             },
-                                             {  
-                                                fieldName: "Time",
-                                                dataField: "time",
-                                                dataType: "string"
-                                             },
-                                             {  
-                                                fieldName: "Status",
-                                                dataField: "status",
-                                                dataType: "string"
-                                             },
-                                            {  
-                                                fieldName: "owner",
-                                                dataField: "owner",
-                                                dataType: "users",
-                                                display: "nodisplay"
-                                             }
-                                            ]
-                                        },
-                                home: {
-                                    settings:{type:"pageSpec",
-                                             pageDisplay: [["toolbar", "Startpad", ["condition", "notsignedin", ["button", "", "signIn()", "Sign In"]], ["condition", "signedin", ["button", "client.username", "", "My Profile"]]],
-                                                            ["h2", "Office Hours"],
-                                                            ["ul" , {"lines": ["sessions", "all"]}],
-                                                            ["condition", "signedin", ["button", "newSession", "", "Host an Office Hour"]]]
-                                            }
-                                    },
-                                condition: {
-                                    signedin: "client.username != undefined",
-                                    owned: "isOwned(arg[0],arg[1])",
-                                    rezholder: "wholeDoc.blob.reservations[arg[1]].status == client.username",
-                                    rezavailable: "wholeDoc.blob.reservations[arg[1]].status == 'Available'",
-                                    rezcancelled: "wholeDoc.blob.reservations[arg[1]].status == 'Cancelled'",
-                                    rezcanceller: "(wholeDoc.blob.reservations[arg[1]].status == client.username) || isOwned(arg[0],arg[1])",
-                                    rezreserver: "(wholeDoc.blob.reservations[arg[1]].status == \"Available\") && (!isOwned(arg[0],arg[1]))",
-                                    rezcancancel: "(wholeDoc.blob.reservations[arg[1]].status != 'Cancelled') && isOwned(arg[0],arg[1])",
-                                    rezcanuncancel: "(wholeDoc.blob.reservations[arg[1]].status == 'Cancelled') && isOwned(arg[0],arg[1])"
-                                    }
-                        
-                }}
-                    
-    
+
     };
-    
+
     var location = "StartPad";
 
     function onReady() {
@@ -254,7 +254,7 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
 
         //$('#newSession').submit(onNewSession);
     }
-    
+
 
     function setDoc(stuff) {
         //client.log("stuff:" + stuff);
@@ -268,24 +268,24 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
 
 
     }
-    
-    
+
+
     function getDoc() {
         return wholeDoc;
     }
-    
+
     var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 
     /*  updatePages()
-    Calls for a page to be built for each instance of each schema. 
-    (ignores special schema 'instructions'). 
-    Calls buildPage(dataType, key) sending dataType (what schema) and key (which instance of that schema to build)
-    Calls buildPage for edit page if signed in and owner of instance
+        Calls for a page to be built for each instance of each schema.
+        (ignores special schema 'instructions').
+        Calls buildPage(dataType, key) sending dataType (what schema) and key (which instance of that schema to build)
+        Calls buildPage for edit page if signed in and owner of instance
     */
     function updatePages() {
         buildPage("home", "all");
-        
+
         for (var schema in wholeDoc.blob) {
             if (schema != "instructions") {
                 for (var key in wholeDoc.blob[schema]) {
@@ -296,14 +296,14 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
                 }
             }
         }
-        
+
     }
 
     /*  buildPage(pageType, key)
-    calls genPageHTML (pageType, key, style) (style is optional indication to build edit, rather than view)
-    which returns HTML for referenced page. Once HTML returned, it is pushed to proper place to either create
-    or update the page.
-        */
+        calls genPageHTML (pageType, key, style) (style is optional indication to build edit, rather than view)
+        which returns HTML for referenced page. Once HTML returned, it is pushed to proper place to either create
+        or update the page.
+    */
     function buildPage(pageType, key, style) {
         var html = "";
         var pageId = "";
@@ -311,8 +311,8 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
 
         if(key[1] != undefined) {
             i = key[0];
-            var j = key[1]; 
-            
+            var j = key[1];
+
         }
         //client.log("pagetype: " + pageType + " key: " + key + " i:" + i + " j:" + j );
         if (style == undefined)
@@ -329,7 +329,7 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
             html = genPageHTML(pageType, key, style);
 
         if($("#"+pageId).length == 0) {
-            html = '<div id="' + pageId + '">' + html + '</div>';   
+            html = '<div id="' + pageId + '">' + html + '</div>';
             $("#jqt").append(html);
         }
         else {
@@ -338,9 +338,9 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     }
 
     /* genPageHTML(pageType, key, style)
-    Grabs display instructions from instructions[dataType].settings[pageEdit or pageDisplay]
-    This is an ordered list of elements.  
-    Then, calls genElementHTML for each element in instruction array and returns concatenated html.
+       Grabs display instructions from instructions[dataType].settings[pageEdit or pageDisplay]
+       This is an ordered list of elements.
+       Then, calls genElementHTML for each element in instruction array and returns concatenated html.
     */
     function genPageHTML(pageType, key, style) {
         var html = "";
@@ -357,11 +357,11 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     }
 
     /* genElementHTML(dataArray, dataType, key, style)
-    builds an element based on instructions given
-    dataArray[0] indicates the type of element to build. 
-    (can be "condition" for switch)
-    subsequent array elements define how that element type should be created.  
-    Passes all display instructions to unique element builder
+       builds an element based on instructions given
+       dataArray[0] indicates the type of element to build.
+       (can be "condition" for switch)
+       subsequent array elements define how that element type should be created.
+       Passes all display instructions to unique element builder
     */
     function genElementHTML(dataArray, dataType, key, style) {
         var html = "";
@@ -369,15 +369,15 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         var contentType = dataArray[0];
         if (contentType == "condition") {
             if (checkCondition(dataArray[1], [dataType, key])){
-                    html += genElementHTML(dataArray[2], dataType, key, style);
-            } 
+                html += genElementHTML(dataArray[2], dataType, key, style);
+            }
         } else if (contentType == "ul") {
             html += genUlHTML(dataType, key, style, dataArray[1].lines);
         } else if (contentType == "h2") {
             html += "<h2>" + dataArray[1] + "</h2>";
         } else if (contentType == "link") {
-            html += '<ul class="rounded"><li class="arrow"><a href="#' + 
-                    dataArray[1] + '">' + dataArray[2] + '</a></li></ul>';
+            html += '<ul class="rounded"><li class="arrow"><a href="#' +
+                dataArray[1] + '">' + dataArray[2] + '</a></li></ul>';
         } else if (contentType == "button") {
             html += buttonHTML(dataArray[3], dataArray[1], dataArray[2], dataType, key);
         } else if (contentType == "toolbar") {
@@ -390,7 +390,7 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
 
 
 
-    
+
 
     function homeHTML () {
         var html = '';
@@ -413,12 +413,12 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     function genUlHTML (dataType, key, style, lines) {
         /* generates a UL with data within scope
 
-        arguments
-        dataType: what kind of data
-        key: name in dataType's namespace
-        style: "display" or "edit"
+           arguments
+           dataType: what kind of data
+           key: name in dataType's namespace
+           style: "display" or "edit"
 
-        ulClass -  used for JQTouch display, default to rounded
+           ulClass -  used for JQTouch display, default to rounded
         */
 
         var ulClass = "rounded";
@@ -451,8 +451,8 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
                             var link = "nolink";
                             if (attr.display == "nolabel")
                                 label = "nolabel";
-                            if ((attr.dataType != "string" && attr.dataType != "time" && 
-                                attr.dataType != "date" && attr.dataType != "textarea") &&
+                            if ((attr.dataType != "string" && attr.dataType != "time" &&
+                                 attr.dataType != "date" && attr.dataType != "textarea") &&
                                 style == "display") {
                                 link = value;
                                 //value = target;
@@ -461,54 +461,54 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
                             if (attr.linked != undefined && attr.linked == "nolink") {
                                 link = "nolink";
                                 //console.log("temp: " + attr.linked +" link: " + link);
-                            }   
-                            
-                            html += genLineHTML({"dataType": attr.dataType, "value": value, 
-                                    "label": label, "style": style, "id": key + "-" + attr.dataField, "link": link});
+                            }
+
+                            html += genLineHTML({"dataType": attr.dataType, "value": value,
+                                                 "label": label, "style": style, "id": key + "-" + attr.dataField, "link": link});
                         }
                     }
                 }
             }
-            
+
         }
 
         html += '</ul>';
         //console.log("genUlHTML returns: " + html);
         return html;
-        
+
     }
 
     function genLineHTML(line) {
         /* This function is the generate the contents of a single line item.
-        It accepts JSON object with 
-        dataType (string, date, sessions), 
-        value,  
-        label,
-        rows,
-        id, - for saving data out of editable fields
-        style: (display/edit), and 
-        link (if it is to be hyperlnked)
+           It accepts JSON object with
+           dataType (string, date, sessions),
+           value,
+           label,
+           rows,
+           id, - for saving data out of editable fields
+           style: (display/edit), and
+           link (if it is to be hyperlnked)
         */
- 
+
 
         var html = '<li';
 
         if (line.dataType == "textarea" && line.style == "display")
             html += '>' + line.value;
         else {
-            if (line.link && line.link != "nolink") 
+            if (line.link && line.link != "nolink")
                 html += ' class="arrow"><a href="#' + line.link + '">';
             else
                 html += '>';
 
             if(line.label && line.label != undefined && line.label != "nolabel")
-                    html += '<label style="float:left">' + line.label + ':</label>';
+                html += '<label style="float:left">' + line.label + ':</label>';
 
             html += valueHTML(line.dataType, line.value, line.style, line.id);
 
             if (line.link)
                 html += '</a>';
-            
+
         }
 
         return html + '</li>';
@@ -522,19 +522,19 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         for (var i = 0; i < templates[0].length; i++) {
             html += templates[0][i];
             if (templates[1][i]) {
-                    str = "" + templates[1][i] + "";
-                    //console.log("str: " + str + " exists: " + data);
-                    if (wholeDoc.blob[str]) {
-                        //console.log({"da str": str, "data": data});
-                        html += valueHTML(str, data[str], "display");
-                    }
-                    else {
-                        //console.log({"str": str, "data": data});  
-                        
-                        var logme = valueHTML(str, data[str], "display");
-                        //console.log(logme);
-                        html += logme;
-                    }
+                str = "" + templates[1][i] + "";
+                //console.log("str: " + str + " exists: " + data);
+                if (wholeDoc.blob[str]) {
+                    //console.log({"da str": str, "data": data});
+                    html += valueHTML(str, data[str], "display");
+                }
+                else {
+                    //console.log({"str": str, "data": data});
+
+                    var logme = valueHTML(str, data[str], "display");
+                    //console.log(logme);
+                    html += logme;
+                }
             }
 
         }
@@ -543,11 +543,11 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
 
     function valueHTML(dataType, value, style, id) {
         /*Converts value to dataTyped HTML view, calls self recursively for data objects
-        args:
-        dataType: string,date,time,textarea or data obj type
-        value: one of above or reference to data obj type
-        style: display/edit
-        id: id to save editable fields
+          args:
+          dataType: string,date,time,textarea or data obj type
+          value: one of above or reference to data obj type
+          style: display/edit
+          id: id to save editable fields
         */
         var html = '';
 
@@ -558,7 +558,7 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
                         value + '" style="width:100%" />';
                 }
                 else {
-                    html += '<textarea rows="2" style="width:100%" id="' + id + 
+                    html += '<textarea rows="2" style="width:100%" id="' + id +
                         '">' + value + '</textarea>';
                 }
             }
@@ -592,7 +592,7 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
                     console.log("Rez hit");
 
                 //console.log({"dataType": dataType, "val": value, "temp": temp,
-                             //"temp2": temp2, "templates": 0, "data": 0});
+                //"temp2": temp2, "templates": 0, "data": 0});
                 var temp3 = temp2.settings.lineDisplay;
                 //console.log("complex output: " + shuffleTemplates(temp3, temp[value]));
                 html += shuffleTemplates(temp3, temp[value]);
@@ -611,7 +611,7 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
                 title = wholeDoc.blob[dataType][id][title[1]];
         }
         var html = '<div class="toolbar">' +
-                        '<h1>' + title + '</h1>';
+            '<h1>' + title + '</h1>';
         if(button2)
             var buttons = [button1, button2];
         else
@@ -619,37 +619,37 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         for (i=0; i < buttons.length; i++) {
             if (i == 0)
                 var slide = "slideleft";
-            else 
+            else
                 var slide = "slideright";
 
             var buttonType = buttons[i][0];
 
             if (buttonType == "condition") {
                 if (checkCondition(buttons[i][1], [dataType, id]))
-                        buttonType = buttons[i][2];
+                    buttonType = buttons[i][2];
 
-                
+
                 //console.log(["condition output", buttonType]);
-            } 
+            }
 
 
             var buttontype = "button";
             /*if (buttons[i].text == "Save")
-                buttontype = "saveButton";*/
+              buttontype = "saveButton";*/
             //console.log([typeof(buttons[i][0]), buttons[i][0]]);
 
             if(buttonType == "back" || buttons[i].funct == "back") {
                 var buttonText = "Back";
                 //if (buttons[i].text)
-                    //buttonText = buttons[i].text;
+                //buttonText = buttons[i].text;
                 html += '<a href="#" class="back">' + buttonText + '</a>';
             } else if (buttonType == "edit") {
                 html +='<a href="#' + id + 'edit" class="button slideright">Edit</a>';
             } else if (buttonType == "save") {
                 html +='<a  onclick="officehours.saveData(\''+id+'\',\''+dataType+'\',\''+id+'\')" class="button slide reverse">Save</a>';
             }
-                //html += '<a href="#' + buttons[i].href + '" class="' + buttontype + ' ' + slide + '" onclick="' + 
-                    //buttons[i].funct+ '" >' + buttons[i].text + '</a>';
+            //html += '<a href="#' + buttons[i].href + '" class="' + buttontype + ' ' + slide + '" onclick="' +
+            //buttons[i].funct+ '" >' + buttons[i].text + '</a>';
             //}
         }
 
@@ -660,24 +660,24 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     function toolbarHTML(h1txt, buttons) {
         // buttons is an array of the buttons.  accepts either "back" or JSON object with text, href and funct
         var html = '<div class="toolbar">' +
-                        '<h1>' + h1txt + '</h1>';
-        
+            '<h1>' + h1txt + '</h1>';
+
         for (i=0; i < buttons.length; i++) {
             if (i == 0)
                 var slide = "slideleft";
-            else 
+            else
                 var slide = "slideright";
 
             var buttontype = "button";
             /*if (buttons[i].text == "Save")
-                buttontype = "saveButton";*/
+              buttontype = "saveButton";*/
 
             if(buttons[i] == "back" || buttons[i].funct == "back")
                 html += '<a href="#" class="back">' + buttons[i].text+ '</a>';
             else if(buttons[i] == "save" || buttons[i].funct == "save")
                 html += '<a href="#" onclick="">' + buttons[i].text+ '</a>';
             else {
-                html += '<a href="#' + buttons[i].href + '" class="' + buttontype + ' ' + slide + '" onclick="' + 
+                html += '<a href="#' + buttons[i].href + '" class="' + buttontype + ' ' + slide + '" onclick="' +
                     buttons[i].funct+ '" >' + buttons[i].text + '</a>';
             }
         }
@@ -716,19 +716,19 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         var not = false;
         condition = "" + condition;
         if(condition.charAt(0) == "n" &&
-            condition.charAt(1) == "o" &&
-            condition.charAt(2) == "t") {
-                not = true;
-                console.log(condition);
-                condition = condition.substr(3);
-                console.log(condition);
-            }
+           condition.charAt(1) == "o" &&
+           condition.charAt(2) == "t") {
+            not = true;
+            console.log(condition);
+            condition = condition.substr(3);
+            console.log(condition);
+        }
         var result = false;
- 
+
         if(eval(wholeDoc.blob.instructions.condition[condition]))
             result =  true;
 
-       // console.log("not: " + not + " result" + result + "output: " + ( not ? !result : result ) + " condition: " + condition);      
+        // console.log("not: " + not + " result" + result + "output: " + ( not ? !result : result ) + " condition: " + condition);
 
         if( not ? !result : result ) {
             return true;
@@ -772,7 +772,7 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         updatePages();
         jQT.goTo('#' + goPage);
     }
-    
+
     function deleteData(a1, a2, a3, a4, a5) {
         console.log("deleteData: a1: " + a1 + ", a2:" + a2 + ", a3:" + a3 + ", a4:" + a4 + ", a5:" + a5);
         delete wholeDoc.blob[a1][a2];
@@ -784,36 +784,36 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         //alert(username);
         $('#homeSignIn').html('<a class="button slideleft" id="saveButton" href="#myProfile">'+ username +'</a>');
     }
-    
+
     function myAppointments(sessions) {
         var html = '';
         for(var key in sessions) {
-            if(sessions[key].provider == client.username) { 
-                html += '<li class="arrow">' + 
-                            '<a href="#' + sessions[key].id +'">' + sessions[key].title +
-                        ' <br/>' + userToFullname(sessions[key].provider) + ' - ' + 
-                        months[sessions[key].date.getMonth()] + ' ' + 
-                        sessions[key].date.getDate() +
-                        ' - ' + getTime(sessions[key].time) +
-                        '</a></li>';
+            if(sessions[key].provider == client.username) {
+                html += '<li class="arrow">' +
+                    '<a href="#' + sessions[key].id +'">' + sessions[key].title +
+                    ' <br/>' + userToFullname(sessions[key].provider) + ' - ' +
+                    months[sessions[key].date.getMonth()] + ' ' +
+                    sessions[key].date.getDate() +
+                    ' - ' + getTime(sessions[key].time) +
+                    '</a></li>';
             }
             for(var i = 0; i < 4; i++) {
                 if(sessions[key].reservation[i] == client.username) {
-                    html += '<li class="arrow">' + 
-                            '<a href="#' + sessions[key].id +'">' + sessions[key].title +
-                            ' <br/>' + userToFullname(sessions[key].provider) + ' - ' + 
-                            months[sessions[key].date.getMonth()] + ' ' + 
-                            sessions[key].date.getDate() +
-                            ' - ' + getSeshTime(sessions[key].time, i) +
-                            '</a></li>';
+                    html += '<li class="arrow">' +
+                        '<a href="#' + sessions[key].id +'">' + sessions[key].title +
+                        ' <br/>' + userToFullname(sessions[key].provider) + ' - ' +
+                        months[sessions[key].date.getMonth()] + ' ' +
+                        sessions[key].date.getDate() +
+                        ' - ' + getSeshTime(sessions[key].time, i) +
+                        '</a></li>';
                 }
             }
         }
-        
+
         $('#myAppts').html(html);
     }
 
-    
+
 
 
     function saveNewSession() {
@@ -825,18 +825,18 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         //var seshDate = new Date($('#seshDate').attr("value"));
         var seshTime = $('#seshTime').attr("value");
         var newId = client.username + '-' + base.randomInt(10000);
-        var newSesh = { 
-                        id: newId,
-                        title: seshTitle,
-                        description: seshDesc,
-                        provider: client.username,
-                        date: seshDate,
-                        time: seshTime,
-                        "reservation-0": newId + "-0",
-                        "reservation-1": newId + "-1",
-                        "reservation-2": newId + "-2",
-                        "reservation-3": newId + "-3"
-                      };
+        var newSesh = {
+            id: newId,
+            title: seshTitle,
+            description: seshDesc,
+            provider: client.username,
+            date: seshDate,
+            time: seshTime,
+            "reservation-0": newId + "-0",
+            "reservation-1": newId + "-1",
+            "reservation-2": newId + "-2",
+            "reservation-3": newId + "-3"
+        };
         client.log(newSesh);
         wholeDoc.blob.sessions[newSesh.id] = newSesh;
         wholeDoc.blob.reservations[newSesh.id+"-0"]=  {status: "Available", time: "11 :00AM - 11:30AM", parent: newId, owner: client.username};
@@ -863,16 +863,16 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
 
     function signOut() {
         client.log(client.signOut());
-        
+
     }
 
     function signIn() {
         client.signIn();
-        
+
     }
 
     function editSession() {
-        
+
     }
 
     function onUserChange() {
@@ -884,7 +884,7 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     }
 
     function setDocid() {
-        
+
     }
 
     // Stub to get data from pageforest
@@ -897,7 +897,7 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
                     description: "This is a great session where you will learn lots of stuff about JQTouch.",
                     provider: "cwkoss",
                     date: new Date("1/1/2011"),
-                    time: 11, 
+                    time: 11,
                     reservation: ["Available" , "mckoss", "bobby", "Available"]
                 },
                 {
@@ -918,39 +918,39 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
                     time: 14,
                     reservation: ["Available" , "Available" , "bobby" , "cwkoss"]
                 }
-             ];
+            ];
         return json;
     }
-    
 
-    
-    
-    
+
+
+
+
     function userToFullname(username) {
         for (var key in wholeDoc.blob.users) {
             if (wholeDoc.blob.users[key].username == username)
                 return wholeDoc.blob.users[key].fullname;
-            
+
         }
     }
-    
-    function timeSelect(time) { 
 
-                    
+    function timeSelect(time) {
+
+
         var html = '<select>';
         for(i = 0; i < times.length; i++) {
             if(time == i)
                 html += '<option value="' + i +'" selected ="yes">' + times[i] + '</option>';
-            else 
+            else
                 html += '<option value="' + i +'">' + times[i] + '</option>';
-            
+
         }
         html += '</select>';
-            
+
         alert("hi");
         return html;
     }
-    
+
     function getTime(key) {
         if (key[1])
             return rezTime(key);
@@ -965,7 +965,7 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
             str += ":00AM - ";
         else
             str += ":00PM - ";
-        
+
         noon = ((key+2)%12);
         if (noon == 0)
             noon = 12;
@@ -980,48 +980,48 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     function rezTime(key) {
         return getSeshTime(key[0], key[1]);
     }
-    
+
     function getSeshTime(time, rez) {
         if(rez > 1)
             time++;
-        
+
         var str = "";
 
         if (time == 12 || time == 0)
             str += '12';
         else
-            str += (time % 12); 
-        
+            str += (time % 12);
+
         if(rez % 2 == 0)
             str += ":00";
-        else 
+        else
             str += ":30";
-        
-        
+
+
         if(time < 12 || time > 23)
             str += "AM - ";
         else
             str += "PM - ";
-        
+
         if(rez % 2 == 1)
             time++;
-        
+
         if (time == 12 || time == 0)
             str += '12';
         else
             str += (time % 12);
-        
+
         if(rez % 2 == 1)
             str += ":00";
         else {
             str += ":30";
         }
-        
+
         if(time < 12 || time > 23)
             str += "AM";
         else
             str += "PM";
-        
+
         return str;
     }
 
@@ -1041,10 +1041,10 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     function dateHTML (date, id) {
         if (typeof(date) != "object") {
             console.log("dateHTML error: date is not an object, id: " + id +
-                "  date: " + date + "  - Reset to Jan1");
+                        "  date: " + date + "  - Reset to Jan1");
             date = new Date(2011, 1, 1);
         }
-            
+
         return months[date.getMonth()] + " " + date.getDate();
     }
 
@@ -1058,13 +1058,13 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         }
         select += '</select>';
 
-        var html = '<input id="' + id + '-d" style="float:right" type="text" maxlength="2" size="2" value="' + 
+        var html = '<input id="' + id + '-d" style="float:right" type="text" maxlength="2" size="2" value="' +
             date.getDate() + '" />' + select;
 
         return html;
     }
 
-    // Namespace exported properties  
+    // Namespace exported properties
     // TODO: Add any additional functions that you need to access
     // from your index.html page.
     ns.extend({
@@ -1084,5 +1084,5 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         'setData': setData,
         'deleteData': deleteData
     });
-    
+
 }); // org.startpad.officehours
