@@ -87,12 +87,10 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         }
 
         if ($("#" + pageId).length == 0) {
-            html = '<div id="' + pageId + '">' + html + '</div>';
-            $("#jqt").append(html);
+            $("#jqt").append('<div id="' + pageId + '"></div>');
         }
-        else {
-            $("#" + pageId).html(html);
-        }
+
+        $("#" + pageId).html(html);
     }
 
     /* genPageHTML(pageType, key, style) Grabs display instructions
@@ -103,16 +101,12 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     */
     function genPageHTML(pageType, key, style) {
         var html = "";
-        var display;
 
-        if (style == "edit") {
-            display = wholeDoc.blob.instructions[pageType].settings.pageEdit;
-        } else {
-            display = wholeDoc.blob.instructions[pageType].settings.pageDisplay;
-            style = "display";
-        }
-        for (var i = 0; i < display.length ; i++) {
-            html += genElementHTML(display[i], pageType, key, style);
+        style = style || 'display';
+
+        var elements = wholeDoc.blob.instructions[pageType].settings[style];
+        for (var i = 0; i < elements.length ; i++) {
+            html += genElementHTML(elements[i], pageType, key, style);
         }
         return html;
     }
@@ -128,23 +122,31 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         var html = "";
         //console.log(dataArray, dataType, key);
         var contentType = dataArray[0];
-        if (contentType == "condition") {
+        switch (contentType) {
+        case 'condition':
             if (checkCondition(dataArray[1], [dataType, key])) {
                 html += genElementHTML(dataArray[2], dataType, key, style);
             }
-        } else if (contentType == "ul") {
+            break;
+        case 'ul':
             html += genUlHTML(dataType, key, style, dataArray[1].lines);
-        } else if (contentType == "h2") {
+            break;
+        case 'h2':
             html += "<h2>" + dataArray[1] + "</h2>";
-        } else if (contentType == "link") {
+            break;
+        case 'link':
             html += '<ul class="rounded"><li class="arrow"><a href="#' +
                 dataArray[1] + '">' + dataArray[2] + '</a></li></ul>';
-        } else if (contentType == "button") {
+            break;
+        case 'button':
             html += buttonHTML(dataArray[3], dataArray[1], dataArray[2], dataType, key);
-        } else if (contentType == "toolbar") {
+            break;
+        case 'toolbar':
             html += genToolbarHTML(dataArray[1], dataArray[2], dataArray[3], key, dataType);
-        } else {
+            break;
+        default:
             console.log("genElementHTML error: contentType not recognized");
+            break;
         }
         return html;
     }

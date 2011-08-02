@@ -79,12 +79,12 @@ namespace.lookup('com.pageforest.officehours.sample-data').defineOnce(function (
             instructions: {
                 sessions: {
                     settings:{  owner: "provider",
-                                pageDisplay: [["toolbar", ["value", "title"], ["back"], ["condition", "owned", "edit"]],
+                                display: [["toolbar", ["value", "title"], ["back"], ["condition", "owned", "edit"]],
                                               ["ul", {"lines":["description", "provider", "date", "time"]}],
                                               ["h2", "Schedule"],
                                               ["ul", {"lines": ["reservation-0", "reservation-1", "reservation-2", "reservation-3"]}],
                                               ["condition", "owned", ["button", "", ["delete", "sessions", "key"], "Delete this Office Hour"]]],
-                                pageEdit: [["toolbar", ["value", "title"], ["back", "Cancel"], ["save"]],
+                                edit: [["toolbar", ["value", "title"], ["back", "Cancel"], ["save"]],
                                            ["ul", {"lines":["description", "provider", "date", "time"]}]],
 
 
@@ -148,10 +148,10 @@ namespace.lookup('com.pageforest.officehours.sample-data').defineOnce(function (
 
                 users: {
                     settings:{lineDisplay: [['<div style="float:right">', '</div>'], ["fullname"]],
-                              pageDisplay: [["toolbar", "Profile", ["back"], ["condition", "owned", "edit"]],
+                              display: [["toolbar", "Profile", ["back"], ["condition", "owned", "edit"]],
                                             ["ul", {"lines": ["fullname", "phone", "email"]}],
                                             ["condition", "owned", ["link", "myappt", "My Appointments"]]],
-                              pageEdit:  [["toolbar", "Profile", ["back"], ["save"]],
+                              edit:  [["toolbar", "Profile", ["back"], ["save"]],
                                           ["ul", {"lines": ["fullname", "phone", "email"]}]],
                               owner: "username",
                               lineEdit: []},
@@ -180,7 +180,7 @@ namespace.lookup('com.pageforest.officehours.sample-data').defineOnce(function (
                 },
                 reservations: {
                     settings:{lineDisplay: [['<div style="float:left">', '</div>','<div style="float:right">', '</div>'], ["time", "", "status"]],
-                              pageDisplay: [["toolbar", "Reservation", ["back"]],
+                              display: [["toolbar", "Reservation", ["back"]],
                                             ["ul", {"lines": ["parent", "time", "status"]}],
                                             ["condition", "rezreserver", ["button", "", ["set", "status", "client.username", ""], "Reserve This Session"]],
                                             ["condition", "rezholder", ["button", "", ["set", "status", "\"Available\"", ""], "Cancel This Session"]],
@@ -215,7 +215,7 @@ namespace.lookup('com.pageforest.officehours.sample-data').defineOnce(function (
                 },
                 home: {
                     settings:{type:"pageSpec",
-                              pageDisplay: [["toolbar", "Startpad", ["condition", "notsignedin", ["button", "", "signIn()", "Sign In"]], ["condition", "signedin", ["button", "client.username", "", "My Profile"]]],
+                              display: [["toolbar", "Startpad", ["condition", "notsignedin", ["button", "", "signIn()", "Sign In"]], ["condition", "signedin", ["button", "client.username", "", "My Profile"]]],
                                             ["h2", "Office Hours"],
                                             ["ul" , {"lines": ["sessions", "all"]}],
                                             ["condition", "signedin", ["button", "newSession", "", "Host an Office Hour"]]]
