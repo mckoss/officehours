@@ -1,8 +1,10 @@
+/*jslint evil:true */
 namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     var clientLib = namespace.lookup('com.pageforest.client');
     var base = namespace.lookup('org.startpad.base');
     var client;
-    var textCutoff = 30; //This is the length at which a textarea will be displayed instead of a text input
+    var textCutoff = 30; //This is the length at which a textarea will
+                         //be displayed instead of a text input
     var currentYear = 2011;
     var wholeDoc = namespace.lookup('com.pageforest.officehours.sample-data').wholeDoc;
 
@@ -26,13 +28,14 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         return wholeDoc;
     }
 
-    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-    /*  updatePages()
-        Calls for a page to be built for each instance of each schema.
-        (ignores special schema 'instructions').
-        Calls buildPage(dataType, key) sending dataType (what schema) and key (which instance of that schema to build)
-        Calls buildPage for edit page if signed in and owner of instance
+    /*  updatePages() Calls for a page to be built for each instance
+        of each schema. (ignores special schema 'instructions'). Calls
+        buildPage(dataType, key) sending dataType (what schema) and
+        key (which instance of that schema to build) Calls buildPage
+        for edit page if signed in and owner of instance
     */
     function updatePages() {
         buildPage("home", "all");
@@ -43,66 +46,72 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
                     buildPage(schema, key);
                     var owner = wholeDoc.blob.instructions[schema].settings.owner;
                     // TODO: App specific code
-                    if (wholeDoc.blob[schema][key][owner] == client.username && schema != "reservations")
+                    if (wholeDoc.blob[schema][key][owner] == client.username &&
+                        schema != "reservations") {
                         buildPage(schema, key, "edit");
+                    }
                 }
             }
         }
 
     }
 
-    /*  buildPage(pageType, key)
-        calls genPageHTML (pageType, key, style) (style is optional indication to build edit, rather than view)
-        which returns HTML for referenced page. Once HTML returned, it is pushed to proper place to either create
-        or update the page.
+    /*  buildPage(pageType, key) calls genPageHTML (pageType, key,
+        style) (style is optional indication to build edit, rather
+        than view) which returns HTML for referenced page. Once HTML
+        returned, it is pushed to proper place to either create or
+        update the page.
     */
     function buildPage(pageType, key, style) {
         var html = "";
         var pageId = "";
 
-
-        if(key[1] != undefined) {
+        if (key[1] != undefined) {
             i = key[0];
             var j = key[1];
-
         }
+
         //client.log("pagetype: " + pageType + " key: " + key + " i:" + i + " j:" + j );
-        if (style == undefined)
-            style = "display";
+        style = style || 'display';
 
         pageId = key;
-        if(style == "edit")
+        if (style == "edit") {
             pageId += "edit";
+        }
 
         if (pageType == "home") {
             pageId = "home";
             html = homeHTML();
-        } else
+        } else {
             html = genPageHTML(pageType, key, style);
+        }
 
-        if($("#"+pageId).length == 0) {
+        if ($("#" + pageId).length == 0) {
             html = '<div id="' + pageId + '">' + html + '</div>';
             $("#jqt").append(html);
         }
         else {
-            $("#"+pageId).html(html);
+            $("#" + pageId).html(html);
         }
     }
 
-    /* genPageHTML(pageType, key, style)
-       Grabs display instructions from instructions[dataType].settings[pageEdit or pageDisplay]
-       This is an ordered list of elements.
-       Then, calls genElementHTML for each element in instruction array and returns concatenated html.
+    /* genPageHTML(pageType, key, style) Grabs display instructions
+       from instructions[dataType].settings[pageEdit or pageDisplay]
+       This is an ordered list of elements. Then, calls genElementHTML
+       for each element in instruction array and returns concatenated
+       html.
     */
     function genPageHTML(pageType, key, style) {
         var html = "";
-        if (style == "edit")
-            var display =wholeDoc.blob.instructions[pageType].settings.pageEdit;
-        else {
-            var display = wholeDoc.blob.instructions[pageType].settings.pageDisplay;
+        var display;
+
+        if (style == "edit") {
+            display = wholeDoc.blob.instructions[pageType].settings.pageEdit;
+        } else {
+            display = wholeDoc.blob.instructions[pageType].settings.pageDisplay;
             style = "display";
         }
-        for(var i = 0; i < display.length ; i++) {
+        for (var i = 0; i < display.length ; i++) {
             html += genElementHTML(display[i], pageType, key, style);
         }
         return html;
@@ -120,7 +129,7 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         //console.log(dataArray, dataType, key);
         var contentType = dataArray[0];
         if (contentType == "condition") {
-            if (checkCondition(dataArray[1], [dataType, key])){
+            if (checkCondition(dataArray[1], [dataType, key])) {
                 html += genElementHTML(dataArray[2], dataType, key, style);
             }
         } else if (contentType == "ul") {
@@ -140,21 +149,19 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         return html;
     }
 
-
-
-
-
-    function homeHTML () {
+    function homeHTML() {
         var html = '';
         var buttons = [];
         var myAppts = '';
-        if (client.username == undefined)
-            buttons.push({text:"Sign In", href:"", funct:"officehours.signIn();"});
-        else {
+        if (client.username == undefined) {
+            buttons.push({text: "Sign In", href: "", funct: "officehours.signIn();"});
+        } else {
             buttons.push({text: client.username, href: client.username});
-            myAppts = '<ul class="rounded"><li class="arrow"><a href="#myappt">My Appointments</a></li></ul>';
+            myAppts = '<ul class="rounded"><li class="arrow">' +
+                '<a href="#myappt">My Appointments</a></li></ul>';
         }
-        html += toolbarHTML(wholeDoc.title, buttons) + '<h2 style="text-align:center">Office Hours</h2>';
+        html += toolbarHTML(wholeDoc.title, buttons) +
+            '<h2 style="text-align:center">Office Hours</h2>';
         html += genUlHTML("sessions", "all", "display");
         html += buttonHTML("Host an Office Hour", "newSession");
         html += myAppts;
@@ -162,7 +169,7 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     }
 
 
-    function genUlHTML (dataType, key, style, lines) {
+    function genUlHTML(dataType, key, style, lines) {
         /* generates a UL with data within scope
 
            arguments
@@ -174,20 +181,26 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         */
 
         var ulClass = "rounded";
-        if (style == undefined)
+        if (style == undefined) {
             style = "display";
+        }
 
 
         var html = '<ul class="' + ulClass + '">';
         var instructions = wholeDoc.blob.instructions[dataType];
+        var target;
 
-        if(key == "all") { //For building home sessions
-            var target = wholeDoc.blob[dataType];
-            for(var id in target) {
-                html += genLineHTML({"dataType": dataType, "value": id, "label": "nolabel", "style": "display", "link": id});
+        if (key == "all") { //For building home sessions
+            target = wholeDoc.blob[dataType];
+            for (var id in target) {
+                html += genLineHTML({"dataType": dataType,
+                                     "value": id,
+                                     "label": "nolabel",
+                                     "style": "display",
+                                     "link": id});
             }
         } else {
-            var target = wholeDoc.blob[dataType][key];
+            target = wholeDoc.blob[dataType][key];
 
             for (var pos = 0; pos < lines.length; pos++) {
                 for (var i = 0; i < instructions.attr.length; i++) {
@@ -201,8 +214,9 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
                             var value = target[temp];
                             var label = attr.fieldName;
                             var link = "nolink";
-                            if (attr.display == "nolabel")
+                            if (attr.display == "nolabel") {
                                 label = "nolabel";
+                            }
                             if ((attr.dataType != "string" && attr.dataType != "time" &&
                                  attr.dataType != "date" && attr.dataType != "textarea") &&
                                 style == "display") {
@@ -215,8 +229,12 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
                                 //console.log("temp: " + attr.linked +" link: " + link);
                             }
 
-                            html += genLineHTML({"dataType": attr.dataType, "value": value,
-                                                 "label": label, "style": style, "id": key + "-" + attr.dataField, "link": link});
+                            html += genLineHTML({"dataType": attr.dataType,
+                                                 "value": value,
+                                                 "label": label,
+                                                 "style": style,
+                                                 "id": key + "-" + attr.dataField,
+                                                 "link": link});
                         }
                     }
                 }
@@ -245,28 +263,31 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
 
         var html = '<li';
 
-        if (line.dataType == "textarea" && line.style == "display")
+        if (line.dataType == "textarea" && line.style == "display") {
             html += '>' + line.value;
-        else {
-            if (line.link && line.link != "nolink")
+        } else {
+            if (line.link && line.link != "nolink") {
                 html += ' class="arrow"><a href="#' + line.link + '">';
-            else
+            } else {
                 html += '>';
+            }
 
-            if(line.label && line.label != undefined && line.label != "nolabel")
+            if (line.label && line.label != undefined && line.label != "nolabel") {
                 html += '<label style="float:left">' + line.label + ':</label>';
+            }
 
             html += valueHTML(line.dataType, line.value, line.style, line.id);
 
-            if (line.link)
+            if (line.link) {
                 html += '</a>';
+            }
 
         }
 
         return html + '</li>';
     }
 
-    function shuffleTemplates (templates, data) {
+    function shuffleTemplates(templates, data) {
         //Shuffle in terms of perfect shuffle, interlaces template arrays
         var html = '';
         var str = '';
@@ -306,7 +327,7 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         if (style == "edit") {
             if (dataType == "string" || dataType == "textarea") {
                 if (value.length < textCutoff) {
-                    html += '<input type="text" id="' + id +'" value="' +
+                    html += '<input type="text" id="' + id + '" value="' +
                         value + '" style="width:100%" />';
                 }
                 else {
@@ -321,7 +342,8 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
                 html += editDateHTML(id, value);
             }
             else if (wholeDoc.blob[dataType]) {
-                console.log("valueHTML ERROR: shouldn't be entire editing data objects with single form field, dataType: " + dataType);
+                console.log("valueHTML ERROR: shouldn't be entire editing data objects " +
+                            "with single form field, dataType: " + dataType);
             } else {
                 //var instLoc = wholeDoc.blob.instructions[dataType];
 
@@ -330,25 +352,28 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
             }
         }
         else if (style == "display") {
-            if (dataType == "string")
+            if (dataType == "string") {
                 html += value;
+            }
             else if (dataType == "date") {
                 html += months[value.getMonth()] + ' ' + value.getDate();
-            } else if (dataType == "time")
+            } else if (dataType == "time") {
                 html += getTime(value);
+            }
             else if (wholeDoc.blob[dataType]) {
 
                 var temp = wholeDoc.blob[dataType];
                 var temp2 = wholeDoc.blob.instructions[dataType];
-                if (temp2 == "status")
+                if (temp2 == "status") {
                     console.log("Rez hit");
+                }
 
                 //console.log({"dataType": dataType, "val": value, "temp": temp,
                 //"temp2": temp2, "templates": 0, "data": 0});
                 var temp3 = temp2.settings.lineDisplay;
                 //console.log("complex output: " + shuffleTemplates(temp3, temp[value]));
                 html += shuffleTemplates(temp3, temp[value]);
-            }else {
+            } else {
                 html += value;
             }
         } else {
@@ -359,26 +384,32 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
 
     function genToolbarHTML(title, button1, button2, id, dataType) {
         if (typeof(title) == "object") {
-            if(title[0] == "value")
+            if (title[0] == "value") {
                 title = wholeDoc.blob[dataType][id][title[1]];
+            }
         }
         var html = '<div class="toolbar">' +
             '<h1>' + title + '</h1>';
-        if(button2)
-            var buttons = [button1, button2];
-        else
-            var buttons = [button1];
-        for (i=0; i < buttons.length; i++) {
-            if (i == 0)
-                var slide = "slideleft";
-            else
-                var slide = "slideright";
+        var buttons;
+        if (button2) {
+            buttons = [button1, button2];
+        } else {
+            buttons = [button1];
+        }
+        for (i = 0; i < buttons.length; i++) {
+            var slide;
+            if (i == 0) {
+                slide = "slideleft";
+            } else {
+                slide = "slideright";
+            }
 
             var buttonType = buttons[i][0];
 
             if (buttonType == "condition") {
-                if (checkCondition(buttons[i][1], [dataType, id]))
+                if (checkCondition(buttons[i][1], [dataType, id])) {
                     buttonType = buttons[i][2];
+                }
 
 
                 //console.log(["condition output", buttonType]);
@@ -390,19 +421,17 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
               buttontype = "saveButton";*/
             //console.log([typeof(buttons[i][0]), buttons[i][0]]);
 
-            if(buttonType == "back" || buttons[i].funct == "back") {
+            if (buttonType == "back" || buttons[i].funct == "back") {
                 var buttonText = "Back";
                 //if (buttons[i].text)
                 //buttonText = buttons[i].text;
                 html += '<a href="#" class="back">' + buttonText + '</a>';
             } else if (buttonType == "edit") {
-                html +='<a href="#' + id + 'edit" class="button slideright">Edit</a>';
+                html += '<a href="#' + id + 'edit" class="button slideright">Edit</a>';
             } else if (buttonType == "save") {
-                html +='<a  onclick="officehours.saveData(\''+id+'\',\''+dataType+'\',\''+id+'\')" class="button slide reverse">Save</a>';
+                html += '<a  onclick="officehours.saveData(\'' + id + '\',\'' +
+                    dataType + '\',\'' + id + '\')" class="button slide reverse">Save</a>';
             }
-            //html += '<a href="#' + buttons[i].href + '" class="' + buttontype + ' ' + slide + '" onclick="' +
-            //buttons[i].funct+ '" >' + buttons[i].text + '</a>';
-            //}
         }
 
         html += '</div>';
@@ -410,27 +439,30 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     }
 
     function toolbarHTML(h1txt, buttons) {
-        // buttons is an array of the buttons.  accepts either "back" or JSON object with text, href and funct
+        // buttons is an array of the buttons. accepts either "back"
+        // or JSON object with text, href and funct
         var html = '<div class="toolbar">' +
             '<h1>' + h1txt + '</h1>';
 
-        for (i=0; i < buttons.length; i++) {
-            if (i == 0)
-                var slide = "slideleft";
-            else
-                var slide = "slideright";
+        for (i = 0; i < buttons.length; i++) {
+            var slide;
+            if (i == 0) {
+                slide = "slideleft";
+            } else {
+                slide = "slideright";
+            }
 
             var buttontype = "button";
             /*if (buttons[i].text == "Save")
               buttontype = "saveButton";*/
 
-            if(buttons[i] == "back" || buttons[i].funct == "back")
-                html += '<a href="#" class="back">' + buttons[i].text+ '</a>';
-            else if(buttons[i] == "save" || buttons[i].funct == "save")
-                html += '<a href="#" onclick="">' + buttons[i].text+ '</a>';
-            else {
-                html += '<a href="#' + buttons[i].href + '" class="' + buttontype + ' ' + slide + '" onclick="' +
-                    buttons[i].funct+ '" >' + buttons[i].text + '</a>';
+            if (buttons[i] == "back" || buttons[i].funct == "back") {
+                html += '<a href="#" class="back">' + buttons[i].text + '</a>';
+            } else if (buttons[i] == "save" || buttons[i].funct == "save") {
+                html += '<a href="#" onclick="">' + buttons[i].text + '</a>';
+            } else {
+                html += '<a href="#' + buttons[i].href + '" class="' + buttontype + ' ' +
+                    slide + '" onclick="' + buttons[i].funct + '" >' + buttons[i].text + '</a>';
             }
         }
 
@@ -441,14 +473,17 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
 
 
     function buttonHTML(text, href, funct, dataType, key) {
-        if(typeof(funct) == "object") {
-            if (funct[0] == "set")
-                funct = "officehours.setData('"+dataType+"','"+key+"','"+funct[1]+"','"+eval(funct[2])+"','"+funct[3]+"')";
-            else if (funct[0] =="delete")
-                funct = "officehours.deleteData('"+dataType+"','"+key+"','"+funct[1]+"','"+eval(funct[2])+"','"+funct[3]+"')";
+        if (typeof(funct) == "object") {
+            if (funct[0] == "set") {
+                funct = "officehours.setData('" + dataType + "','" + key + "','" + funct[1] +
+                    "','" + eval(funct[2]) + "','" + funct[3] + "')";
+            } else if (funct[0] == "delete") {
+                funct = "officehours.deleteData('" + dataType + "','" + key + "','" +
+                    funct[1] + "','" + eval(funct[2]) + "','" + funct[3] + "')";
+            }
         }
         var html = '<a href="#' + href + '" onclick="' + funct +  '" class="whiteButton">' +
-            text +'</a>';
+            text + '</a>';
         return html;
     }
 
@@ -457,17 +492,18 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         var target = type[key];
         var instructions = wholeDoc.blob.instructions[dataType];
         var owner = instructions.settings.owner;
-        if (target[owner] == client.username)
+        if (target[owner] == client.username) {
             return true;
-        else
+        } else {
             return false;
+        }
 
     }
 
     function checkCondition(condition, arg) {
         var not = false;
         condition = "" + condition;
-        if(condition.charAt(0) == "n" &&
+        if (condition.charAt(0) == "n" &&
            condition.charAt(1) == "o" &&
            condition.charAt(2) == "t") {
             not = true;
@@ -477,30 +513,35 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         }
         var result = false;
 
-        if(eval(wholeDoc.blob.instructions.condition[condition]))
+        if (eval(wholeDoc.blob.instructions.condition[condition])) {
             result =  true;
-
-        // console.log("not: " + not + " result" + result + "output: " + ( not ? !result : result ) + " condition: " + condition);
-
-        if( not ? !result : result ) {
-            return true;
         }
-        else {
+
+        // console.log("not: " + not + " result" + result + "output: "
+        // + ( not ? !result : result ) + " condition: " + condition);
+
+        if (not ? !result : result) {
+            return true;
+        } else {
             return false;
         }
     }
 
-    function saveData (id, dataType, goPage) {
-        if (goPage == undefined)
+    function saveData(id, dataType, goPage) {
+        if (goPage == undefined) {
             goPage = id;
+        }
         var instructions = wholeDoc.blob.instructions[dataType];
         var target = wholeDoc.blob[dataType][id];
         //console.log({"id": id, "dataType": dataType, "target": target});
 
         for (var i = 0; i < instructions.attr.length; i++) {
-            if($('#' + id + '-' + instructions.attr[i].dataField).attr("value"))
-                target[instructions.attr[i].dataField] = $('#' + id + '-' + instructions.attr[i].dataField).attr("value");
-            if(instructions.attr[i].dataField == "date") {
+            if ($('#' + id + '-' + instructions.attr[i].dataField).attr("value")) {
+                target[instructions.attr[i].dataField] = $('#' + id + '-' +
+                                                           instructions.attr[i].dataField)
+                    .attr("value");
+            }
+            if (instructions.attr[i].dataField == "date") {
                 var month = $('#' + id + '-date-m').attr("value");
                 var day = $('#' + id + '-date-d').attr("value");
                 target["date"] = new Date(currentYear, month, day);
@@ -526,33 +567,29 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     }
 
     function deleteData(a1, a2, a3, a4, a5) {
-        console.log("deleteData: a1: " + a1 + ", a2:" + a2 + ", a3:" + a3 + ", a4:" + a4 + ", a5:" + a5);
+        console.log("deleteData: a1: " + a1 + ", a2:" + a2 +
+                    ", a3:" + a3 + ", a4:" + a4 + ", a5:" + a5);
         delete wholeDoc.blob[a1][a2];
         jQT.goTo('#home');
         updatePages();
     }
 
-    function onUserChange(username) {
-        //alert(username);
-        $('#homeSignIn').html('<a class="button slideleft" id="saveButton" href="#myProfile">'+ username +'</a>');
-    }
-
     function myAppointments(sessions) {
         var html = '';
-        for(var key in sessions) {
-            if(sessions[key].provider == client.username) {
+        for (var key in sessions) {
+            if (sessions[key].provider == client.username) {
                 html += '<li class="arrow">' +
-                    '<a href="#' + sessions[key].id +'">' + sessions[key].title +
+                    '<a href="#' + sessions[key].id + '">' + sessions[key].title +
                     ' <br/>' + userToFullname(sessions[key].provider) + ' - ' +
                     months[sessions[key].date.getMonth()] + ' ' +
                     sessions[key].date.getDate() +
                     ' - ' + getTime(sessions[key].time) +
                     '</a></li>';
             }
-            for(var i = 0; i < 4; i++) {
-                if(sessions[key].reservation[i] == client.username) {
+            for (var i = 0; i < 4; i++) {
+                if (sessions[key].reservation[i] == client.username) {
                     html += '<li class="arrow">' +
-                        '<a href="#' + sessions[key].id +'">' + sessions[key].title +
+                        '<a href="#' + sessions[key].id + '">' + sessions[key].title +
                         ' <br/>' + userToFullname(sessions[key].provider) + ' - ' +
                         months[sessions[key].date.getMonth()] + ' ' +
                         sessions[key].date.getDate() +
@@ -591,10 +628,22 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         };
         client.log(newSesh);
         wholeDoc.blob.sessions[newSesh.id] = newSesh;
-        wholeDoc.blob.reservations[newSesh.id+"-0"]=  {status: "Available", time: "11 :00AM - 11:30AM", parent: newId, owner: client.username};
-        wholeDoc.blob.reservations[newSesh.id+"-1"]=  {status: "Available", time: "11 :00AM - 11:30AM", parent: newId, owner: client.username};
-        wholeDoc.blob.reservations[newSesh.id+"-2"]=  {status: "Available", time: "11 :00AM - 11:30AM", parent: newId, owner: client.username};
-        wholeDoc.blob.reservations[newSesh.id+"-3"]=  {status: "Available", time: "11 :00AM - 11:30AM", parent: newId, owner: client.username};
+        wholeDoc.blob.reservations[newSesh.id + "-0"] = {status: "Available",
+                                                         time: "11 :00AM - 11:30AM",
+                                                         parent: newId,
+                                                         owner: client.username};
+        wholeDoc.blob.reservations[newSesh.id + "-1"] = {status: "Available",
+                                                         time: "11 :00AM - 11:30AM",
+                                                         parent: newId,
+                                                         owner: client.username};
+        wholeDoc.blob.reservations[newSesh.id + "-2"] = {status: "Available",
+                                                         time: "11 :00AM - 11:30AM",
+                                                         parent: newId,
+                                                         owner: client.username};
+        wholeDoc.blob.reservations[newSesh.id + "-3"] = {status: "Available",
+                                                         time: "11 :00AM - 11:30AM",
+                                                         parent: newId,
+                                                         owner: client.username};
 
         //client.log(wholeDoc.blob.sessions);
         client.log(wholeDoc.blob.reservations);
@@ -641,8 +690,9 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
 
     function userToFullname(username) {
         for (var key in wholeDoc.blob.users) {
-            if (wholeDoc.blob.users[key].username == username)
+            if (wholeDoc.blob.users[key].username == username) {
                 return wholeDoc.blob.users[key].fullname;
+            }
 
         }
     }
@@ -651,12 +701,12 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
 
 
         var html = '<select>';
-        for(i = 0; i < times.length; i++) {
-            if(time == i)
-                html += '<option value="' + i +'" selected ="yes">' + times[i] + '</option>';
-            else
-                html += '<option value="' + i +'">' + times[i] + '</option>';
-
+        for (i = 0; i < times.length; i++) {
+            if (time == i) {
+                html += '<option value="' + i + '" selected ="yes">' + times[i] + '</option>';
+            } else {
+                html += '<option value="' + i + '">' + times[i] + '</option>';
+            }
         }
         html += '</select>';
 
@@ -665,28 +715,33 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     }
 
     function getTime(key) {
-        if (key[1])
+        if (key[1]) {
             return rezTime(key);
+        }
 
         key = key % 24;
         var noon = (key % 12);
-        if (noon == 0)
+        if (noon == 0) {
             noon = 12;
+        }
 
         var str = "" + noon + " ";
-        if(key < 12 || key > 23)
+        if (key < 12 || key > 23) {
             str += ":00AM - ";
-        else
+        } else {
             str += ":00PM - ";
+        }
 
-        noon = ((key+2)%12);
-        if (noon == 0)
+        noon = ((key + 2) % 12);
+        if (noon == 0) {
             noon = 12;
+        }
         str += noon;
-        if((key + 2) < 12 || (key + 2) > 23)
+        if ((key + 2) < 12 || (key + 2) > 23) {
             str += ":00AM";
-        else
+        } else {
             str += ":00PM";
+        }
 
         return str;
     }
@@ -695,45 +750,51 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     }
 
     function getSeshTime(time, rez) {
-        if(rez > 1)
+        if (rez > 1) {
             time++;
+        }
 
         var str = "";
 
-        if (time == 12 || time == 0)
+        if (time == 12 || time == 0) {
             str += '12';
-        else
+        } else {
             str += (time % 12);
+        }
 
-        if(rez % 2 == 0)
+        if (rez % 2 == 0) {
             str += ":00";
-        else
-            str += ":30";
-
-
-        if(time < 12 || time > 23)
-            str += "AM - ";
-        else
-            str += "PM - ";
-
-        if(rez % 2 == 1)
-            time++;
-
-        if (time == 12 || time == 0)
-            str += '12';
-        else
-            str += (time % 12);
-
-        if(rez % 2 == 1)
-            str += ":00";
-        else {
+        } else {
             str += ":30";
         }
 
-        if(time < 12 || time > 23)
+        if (time < 12 || time > 23) {
+            str += "AM - ";
+        } else {
+            str += "PM - ";
+        }
+
+        if (rez % 2 == 1) {
+            time++;
+        }
+
+        if (time == 12 || time == 0) {
+            str += '12';
+        } else {
+            str += time % 12;
+        }
+
+        if (rez % 2 == 1) {
+            str += ":00";
+        } else {
+            str += ":30";
+        }
+
+        if (time < 12 || time > 23) {
             str += "AM";
-        else
+        } else {
             str += "PM";
+        }
 
         return str;
     }
@@ -741,17 +802,18 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
     function timeHTML(id, selected) {
         var html = '<select style="float:right" id="' + id + '">';
         for (var i = 0; i < 24; i++) {
-            if (i == selected)
+            if (i == selected) {
                 html += '<option selected value="' + i + '">' + getTime(i) + '</option>';
-            else
+            } else {
                 html += '<option value="' + i + '">' + getTime(i) + '</option>';
+            }
         }
 
         html += '</select>';
         return html;
     }
 
-    function dateHTML (date, id) {
+    function dateHTML(date, id) {
         if (typeof(date) != "object") {
             console.log("dateHTML error: date is not an object, id: " + id +
                         "  date: " + date + "  - Reset to Jan1");
@@ -765,13 +827,15 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         var select = '<select style="float:right" id="' + id + '-m">';
         for (i = 0; i < 12; i++) {
             select += '<option ';
-            if (date.getMonth() == i)
+            if (date.getMonth() == i) {
                 select += 'selected ';
+            }
             select += 'value="' + i + '">' + months[i] + '</option>';
         }
         select += '</select>';
 
-        var html = '<input id="' + id + '-d" style="float:right" type="text" maxlength="2" size="2" value="' +
+        var html = '<input id="' + id +
+            '-d" style="float:right" type="text" maxlength="2" size="2" value="' +
             date.getDate() + '" />' + select;
 
         return html;
@@ -790,7 +854,6 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         'setDocid': setDocid,
         'signIn': signIn,
         'signOut': signOut,
-        'onUserChange': onUserChange,
         'cancelSession': cancelSession,
         'wholeDoc': wholeDoc,
         'saveData': saveData,
