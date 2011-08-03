@@ -1,0 +1,12 @@
+{
+  "files": {
+    "officehours-all.js": [
+      "namespace-plus.js",
+      { "path": "sample-data.js", "namespace": "com.pageforest.officehours.sample-data" },
+      { "path": "main.js", "namespace": "com.pageforest.officehours" },
+      { "path": "forms.js", "namespace": "org.startpad.forms" }
+    ]
+  },
+  "minify": false,
+  "uploadIndividualFiles": false
+}
