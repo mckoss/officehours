@@ -119,36 +119,29 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
        Passes all display instructions to unique element builder
     */
     function genElementHTML(dataArray, dataType, key, style) {
-        var html = "";
-        //console.log(dataArray, dataType, key);
-        var contentType = dataArray[0];
-        switch (contentType) {
+        // Switch on content type
+        switch (dataArray[0]) {
         case 'condition':
             if (checkCondition(dataArray[1], [dataType, key])) {
-                html += genElementHTML(dataArray[2], dataType, key, style);
+                return genElementHTML(dataArray[2], dataType, key, style);
             }
             break;
         case 'ul':
-            html += genUlHTML(dataType, key, style, dataArray[1].lines);
-            break;
+            return genUlHTML(dataType, key, style, dataArray[1].lines);
         case 'h2':
-            html += "<h2>" + dataArray[1] + "</h2>";
-            break;
+            return "<h2>" + dataArray[1] + "</h2>";
         case 'link':
-            html += '<ul class="rounded"><li class="arrow"><a href="#' +
+            return '<ul class="rounded"><li class="arrow"><a href="#' +
                 dataArray[1] + '">' + dataArray[2] + '</a></li></ul>';
-            break;
         case 'button':
-            html += buttonHTML(dataArray[3], dataArray[1], dataArray[2], dataType, key);
-            break;
+            return buttonHTML(dataArray[3], dataArray[1], dataArray[2], dataType, key);
         case 'toolbar':
-            html += genToolbarHTML(dataArray[1], dataArray[2], dataArray[3], key, dataType);
-            break;
+            return genToolbarHTML(dataArray[1], dataArray[2], dataArray[3], key, dataType);
         default:
             console.log("genElementHTML error: contentType not recognized");
             break;
         }
-        return html;
+        return "";
     }
 
     function homeHTML() {
@@ -170,7 +163,6 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         return html;
     }
 
-
     function genUlHTML(dataType, key, style, lines) {
         /* generates a UL with data within scope
 
@@ -178,17 +170,11 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
            dataType: what kind of data
            key: name in dataType's namespace
            style: "display" or "edit"
-
-           ulClass -  used for JQTouch display, default to rounded
         */
 
-        var ulClass = "rounded";
-        if (style == undefined) {
-            style = "display";
-        }
+        style = style || 'display';
 
-
-        var html = '<ul class="' + ulClass + '">';
+        var html = '<ul class="rounded">';
         var instructions = wholeDoc.blob.instructions[dataType];
         var target;
 
@@ -268,22 +254,28 @@ namespace.lookup('com.pageforest.officehours').defineOnce(function (ns) {
         if (line.dataType == "textarea" && line.style == "display") {
             html += '>' + line.value;
         } else {
-            if (line.link && line.link != "nolink") {
-                html += ' class="arrow"><a href="#' + line.link + '">';
-            } else {
-                html += '>';
-            }
+            var hasLink = line.link && line.link != "nolink";
+            var hasLabel = line.label && line.label != "nolabel";
 
-            if (line.label && line.label != undefined && line.label != "nolabel") {
-                html += '<label style="float:left">' + line.label + ':</label>';
+            if (hasLink) {
+                html += ' class="arrow"><a href="#' + line.link + '"';
+            }
+            html += '>';
+
+            if (hasLabel) {
+                html += '<label style="float: left;">' + line.label + ':</label>';
+                html += '<div style="float: right;">';
             }
 
             html += valueHTML(line.dataType, line.value, line.style, line.id);
 
-            if (line.link) {
-                html += '</a>';
+            if (hasLabel) {
+                html += '</div>';
             }
 
+            if (hasLink) {
+                html += '</a>';
+            }
         }
 
         return html + '</li>';

@@ -80,79 +80,79 @@ namespace.lookup('com.pageforest.officehours.sample-data').defineOnce(function (
                 sessions: {
                     settings:{  owner: "provider",
                                 display: [["toolbar", ["value", "title"], ["back"], ["condition", "owned", "edit"]],
-                                              ["ul", {"lines":["description", "provider", "date", "time"]}],
-                                              ["h2", "Schedule"],
-                                              ["ul", {"lines": ["reservation-0", "reservation-1", "reservation-2", "reservation-3"]}],
-                                              ["condition", "owned", ["button", "", ["delete", "sessions", "key"], "Delete this Office Hour"]]],
+                                          ["ul", {"lines":["description", "provider", "date", "time"]}],
+                                          ["h2", "Schedule"],
+                                          ["ul", {"lines": ["reservation-0", "reservation-1", "reservation-2", "reservation-3"]}],
+                                          ["condition", "owned", ["button", "", ["delete", "sessions", "key"], "Delete this Office Hour"]]],
                                 edit: [["toolbar", ["value", "title"], ["back", "Cancel"], ["save"]],
-                                           ["ul", {"lines":["description", "provider", "date", "time"]}]],
+                                       ["ul", {"lines":["description", "provider", "date", "time"]}]],
 
 
                                 lineDisplay: [['', '<br/>', ' - ', ' - '],
                                               ["title", "provider", "date", "time"]]},
-                    attr:   [{
-                        fieldName: "Title",
-                        dataField: "title",
-                        dataType: "string",
-                        display: "h1text"
-                    },
-                             {
-                                 fieldName: "Description",
-                                 dataField: "description",
-                                 dataType: "textarea",
-                                 display: "nolabel"
-                             },
-                             {
-                                 fieldName: "Provider",
-                                 dataField: "provider",
-                                 dataType: "users",
-                                 condition: " != client.username",
-                                 editable: false
-                             },
-                             {
-                                 fieldName: "Date",
-                                 dataField: "date",
-                                 dataType: "date",
-                                 evaluate: ""
-                             },
-                             {
-                                 fieldName: "Time",
-                                 dataField: "time",
-                                 dataType: "time"
-                             },
-                             {
-                                 fieldName: "Rez 0",
-                                 dataField: "reservation-0",
-                                 dataType: "reservations",
-                                 display: "nolabel"
-                             },
-                             {
-                                 fieldName: "Rez 1",
-                                 dataField: "reservation-1",
-                                 dataType: "reservations",
-                                 display: "nolabel"
-                             },
-                             {
-                                 fieldName: "Rez 2",
-                                 dataField: "reservation-2",
-                                 dataType: "reservations",
-                                 display: "nolabel"
-                             },
-                             {
-                                 fieldName: "Rez 3",
-                                 dataField: "reservation-3",
-                                 dataType: "reservations",
-                                 display: "nolabel"
-                             }]
+                    attr:   [
+                        {
+                            fieldName: "Title",
+                            dataField: "title",
+                            dataType: "string",
+                            display: "h1text"
+                        },
+                        {
+                            fieldName: "Description",
+                            dataField: "description",
+                            dataType: "textarea",
+                            display: "nolabel"
+                        },
+                        {
+                            fieldName: "Provider",
+                            dataField: "provider",
+                            dataType: "users",
+                            condition: " != client.username",
+                            editable: false
+                        },
+                        {
+                            fieldName: "Date",
+                            dataField: "date",
+                            dataType: "date"
+                        },
+                        {
+                            fieldName: "Time",
+                            dataField: "time",
+                            dataType: "time"
+                        },
+                        {
+                            fieldName: "Rez 0",
+                            dataField: "reservation-0",
+                            dataType: "reservations",
+                            display: "nolabel"
+                        },
+                        {
+                            fieldName: "Rez 1",
+                            dataField: "reservation-1",
+                            dataType: "reservations",
+                            display: "nolabel"
+                        },
+                        {
+                            fieldName: "Rez 2",
+                            dataField: "reservation-2",
+                            dataType: "reservations",
+                            display: "nolabel"
+                        },
+                        {
+                            fieldName: "Rez 3",
+                            dataField: "reservation-3",
+                            dataType: "reservations",
+                            display: "nolabel"
+                        }]
                 },
 
                 users: {
                     settings:{lineDisplay: [['<div style="float:right">', '</div>'], ["fullname"]],
                               display: [["toolbar", "Profile", ["back"], ["condition", "owned", "edit"]],
-                                            ["ul", {"lines": ["fullname", "phone", "email"]}],
-                                            ["condition", "owned", ["link", "myappt", "My Appointments"]]],
+                                        ["ul", {"lines": ["fullname", "phone", "email"]}],
+                                        ["condition", "owned", ["link", "myappt", "My Appointments"]]],
                               edit:  [["toolbar", "Profile", ["back"], ["save"]],
-                                          ["ul", {"lines": ["fullname", "phone", "email"]}]],
+                                      ["ul", {"lines": ["fullname", "phone", "email"]}]],
                               owner: "username",
                               lineEdit: []},
                     attr:[{
@@ -181,11 +181,11 @@ namespace.lookup('com.pageforest.officehours.sample-data').defineOnce(function (
                 reservations: {
                     settings:{lineDisplay: [['<div style="float:left">', '</div>','<div style="float:right">', '</div>'], ["time", "", "status"]],
                               display: [["toolbar", "Reservation", ["back"]],
-                                            ["ul", {"lines": ["parent", "time", "status"]}],
-                                            ["condition", "rezreserver", ["button", "", ["set", "status", "client.username", ""], "Reserve This Session"]],
-                                            ["condition", "rezholder", ["button", "", ["set", "status", "\"Available\"", ""], "Cancel This Session"]],
-                                            ["condition", "rezcancancel", ["button", "", ["set", "status", "\"Cancelled\"", ""], "Cancel This Session"]],
-                                            ["condition", "rezcanuncancel", ["button", "", ["set", "status", "\"Available\"", ""], "Make Available"]]],
+                                        ["ul", {"lines": ["parent", "time", "status"]}],
+                                        ["condition", "rezreserver", ["button", "", ["set", "status", "client.username", ""], "Reserve This Session"]],
+                                        ["condition", "rezholder", ["button", "", ["set", "status", "\"Available\"", ""], "Cancel This Session"]],
+                                        ["condition", "rezcancancel", ["button", "", ["set", "status", "\"Cancelled\"", ""], "Cancel This Session"]],
+                                        ["condition", "rezcanuncancel", ["button", "", ["set", "status", "\"Available\"", ""], "Make Available"]]],
                               owner: "owner",
                               lineEdit: []},
                     attr:[{
@@ -216,9 +216,9 @@ namespace.lookup('com.pageforest.officehours.sample-data').defineOnce(function (
                 home: {
                     settings:{type:"pageSpec",
                               display: [["toolbar", "Startpad", ["condition", "notsignedin", ["button", "", "signIn()", "Sign In"]], ["condition", "signedin", ["button", "client.username", "", "My Profile"]]],
-                                            ["h2", "Office Hours"],
-                                            ["ul" , {"lines": ["sessions", "all"]}],
-                                            ["condition", "signedin", ["button", "newSession", "", "Host an Office Hour"]]]
+                                        ["h2", "Office Hours"],
+                                        ["ul" , {"lines": ["sessions", "all"]}],
+                                        ["condition", "signedin", ["button", "newSession", "", "Host an Office Hour"]]]
                              }
                 },
                 condition: {
