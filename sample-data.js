@@ -1,4 +1,84 @@
 namespace.lookup('com.pageforest.officehours.sample-data').defineOnce(function (ns) {
+// display modes: view/edit/new
+
+ns.appDefinition =  {
+    relationships: [
+        // Two element array.
+        // name: defaults to schema name - if only one relationship between any two schema
+        [{ schema: 'sessions', card: 1 }, { schema: 'reservations', card: 4 } ],
+        [{ schema: 'sessions', card: 1 }, { schema: 'reservations', name: 'slot1', card: 1 } ],
+        [{ schema: 'sessions', card: 1 }, { schema: 'reservations', name: 'slot2', card: 1 } ],
+        [{ schema: 'sessions', card: 1 }, { schema: 'reservations', name: 'slot3', card: 1 } ],
+        [{ schema: 'sessions', card: 1 }, { schema: 'reservations', name: 'slot4', card: 1 } ],
+        [{ schema: 'sessions', card: 'many' }, { schema: 'users', name: 'owner',
+                                                 label: 'Provider', card: 1 }]
+    ],
+    schema: {
+        sessions: {
+            views: {
+                read: { ordering: [ 'title', 'description', 'owner', 'date',
+                                    'hour', 'reservation' ]},
+                write: {ordering: [ 'title', 'description', 'date', 'hour' ]},
+                list: { ordering: [ 'title', 'owner', 'date', 'hour' ],
+                        format: "{title}\n{owner} - {date} " }
+            },
+
+            properties: {
+                // name: The unique (internal) name of a property in a schema
+                // label: Text to display next to value in forms - defaults to capitalized 'name'
+                // type: Underlying datatype for storing the property's value
+                //    number, string (default), date, time, datetime, time-range, id,
+                //    schema-instance (schema/id),
+                //    recurring-date
+                //
+                //    special types: id, title, users,
+                //    special properties: id, title, owner(users)
+                // card: 1 (default)
+                //
+                // discuss later...cardinality, time ranges
+
+                // "Special" properties
+                title: { },
+
+                description: { display: 'long-text' },
+                date: { type: 'date' },
+                time: { type: 'time' },
+                reservations: { type: 'reservations', card: 4, owned: true},
+                slot1: { type: 'reservations' },
+                slot2: { type: 'reservations' },
+                slot3: { type: 'reservations' },
+                slot4: { type: 'reservations' },
+                short: { type: 'formatted', format: "{title}\n{owner} - {date} {hourRange}" },
+                hourRange: {type: 'formatted', format: "{time | time} - {time + 2/24 | time}" }
+            }
+        },
+
+        users: {
+            views: {
+                read: { ordering: [ 'title', 'username', 'email', 'phone' ] },
+                write: { ordering: [ 'title', 'email', 'phone' ] }
+            },
+            properties: {
+                title: { label: 'Full Name' },
+                owner: { label: 'User Name', unique: true, initialize: "client.username" },
+                email: { label: 'E-Mail' },
+                phone: { label: 'Phone Number' }
+            }
+        },
+
+        reservations: {
+            properties: {
+                session: { type: 'sessions' },
+                time: { compute: "session.time + session.indexOf(this) * 0.5/24",
+                        format: "{time | time} - {time + 0.5/24 | time}" },
+                status: { valid: ['available', 'reserved', 'canceled'] },
+                reserver: { type: 'users' },
+                owner: { type: 'users', compute: "session.owner" }
+            }
+        }
+    }
+};
+
     ns.wholeDoc = {
         title: "StartPad",
         blob: {
