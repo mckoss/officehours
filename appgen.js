@@ -1,4 +1,8 @@
 /*jslint evil: true */
+var clientLib = require('com.pageforest.client');
+var types = require('org.startpad.types');
+var funcs = require('org.startpad.funcs').patch();
+var string = require('org.startpad.string').patch();
 
 exports.extend({
     'main': main
@@ -11,7 +15,29 @@ var DEFAULT_DATA = "/officehours-data.js";
 var app;
 var data;
 
+var pfApp = {
+    onSaveSuccess: function (json) {
+    },
+
+    setDoc: function (json) {
+        data = json.blob;
+    },
+
+    getDoc: function() {
+        return {
+            blob: data,
+            readers: ['public']
+        };
+    },
+
+    onUserChange: function() {
+    }
+};
+
 function main() {
+    handleAppCache();
+    client = new clientLib.Client(pfApp);
+
     jQT = new $.jQTouch({
         icon: 'jqtouch.png',
         addGlossToIcon: false,
@@ -22,8 +48,8 @@ function main() {
     $.ajax({
         url: DEFAULT_APP,
         dataType: 'text',
-        success: function () {
-            loadApp();
+        success: function (data) {
+            loadApp(data);
             $.ajax({
                 dataType: 'text',
                 url: DEFAULT_DATA,
@@ -31,6 +57,21 @@ function main() {
             });
         }
     });
+}
+
+// For offline - capable applications
+function handleAppCache() {
+    if (typeof applicationCache == 'undefined') {
+        return;
+    }
+
+    if (applicationCache.status == applicationCache.UPDATEREADY) {
+        applicationCache.swapCache();
+        location.reload();
+        return;
+    }
+
+    applicationCache.addEventListener('updateready', handleAppCache, false);
 }
 
 function loadApp(appText) {
