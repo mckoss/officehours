@@ -45,7 +45,6 @@ Size limit
 
 */
 
-namespace.com.pageforest.kahnsept_app.loadApp(
 {
     events: {
         // Do all apps just inherit a users table with this default behavior?
@@ -116,13 +115,12 @@ namespace.com.pageforest.kahnsept_app.loadApp(
             },
             properties: {
                 session: { type: 'sessions' },
-                time: { type: time,
+                time: { type: 'time',
                         compute: "session.time + session.indexOf(this) * 0.5/24",
                         format: "{time | time} - {time + 0.5/24 | time}" },
                 status: { valid: ['available', 'reserved', 'canceled'] },
-                reserver: { type: 'users' },
-                owner: { type: 'users', compute: "session.owner" }
+                reserver: { type: 'users' }
             }
         }
     }
-});
+}
