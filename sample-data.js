@@ -1,53 +1,85 @@
 namespace.lookup('com.pageforest.officehours.sample-data').defineOnce(function (ns) {
-// display modes: view/edit/new
+
+// Notes about properties
+// id: The unique (internal) name of a property in a schema
+// label: Text to display next to value in forms - defaults to capitalized 'name'
+// type: Underlying datatype for storing the property's value
+//    number, string (default), date, time, datetime, time-range, id,
+//    schema-instance (schema/id),
+//    recurring-date
+//
+// card: 0-1 (default)
+
+/*
+
+Properties in every schema:
+
+id: {type: string},
+owner: The creator of an instance.
+   Default definition { type: users } (the type cannot be changed).
+short: This property is used to display references to instances.
+   Default definition is { format: "{title}" }
+
+Optional special properties:
+
+title: Optional default title of an instance
+
+users is a special schema which always exists (id == username)
+
+The default 'short' format is title alone.
+
+Attributes of properties:
+
+type:
+format:
+compute:
+label:
+
+Datatype Universe
+
+Basic Types: number, string (255), text(string any length), date, time,
+   datetime, instance (stored as id of target), boolean, enumerated
+Future basic types:   file (blob), image, video, audio
+Extend Types: currency (number), long-text, phone number, address, email address, url,
+   person's name, zip code, rich text (html),
+Size limit
+
+
+*/
+
 
 ns.appDefinition =  {
-    relationships: [
-        // Two element array.
-        // name: defaults to schema name - if only one relationship between any two schema
-        [{ schema: 'sessions', card: 1 }, { schema: 'reservations', card: 4 } ],
-        [{ schema: 'sessions', card: 1 }, { schema: 'reservations', name: 'slot1', card: 1 } ],
-        [{ schema: 'sessions', card: 1 }, { schema: 'reservations', name: 'slot2', card: 1 } ],
-        [{ schema: 'sessions', card: 1 }, { schema: 'reservations', name: 'slot3', card: 1 } ],
-        [{ schema: 'sessions', card: 1 }, { schema: 'reservations', name: 'slot4', card: 1 } ],
-        [{ schema: 'sessions', card: 'many' }, { schema: 'users', name: 'owner',
-                                                 label: 'Provider', card: 1 }]
-    ],
+    events: {
+        // Do all apps just inherit a users table with this default behavior?
+        onUserChange: "if (!currentUser()) { self = undefined; return; }" +
+            "self = lookup('users', 'this.id == currentUser()');" +
+            "if (!self) {" +
+            "  self = create('users', {id: currentUser()});" +
+            "  edit('users', 'this.id == currentUser()');" +
+            "}"
+    },
     schema: {
         sessions: {
+            commands: {
+                del: { condition: "owner == self", label: "Delete this Office Hour" },
+                create: { label: "Host an Office Hour" }
+            },
             views: {
                 read: { ordering: [ 'title', 'description', 'owner', 'date',
-                                    'hour', 'reservation' ]},
+                                    'hour', 'reservation', { command: 'del' } ]},
                 write: {ordering: [ 'title', 'description', 'date', 'hour' ]},
                 list: { ordering: [ 'title', 'owner', 'date', 'hour' ],
                         format: "{title}\n{owner} - {date} " }
             },
 
             properties: {
-                // name: The unique (internal) name of a property in a schema
-                // label: Text to display next to value in forms - defaults to capitalized 'name'
-                // type: Underlying datatype for storing the property's value
-                //    number, string (default), date, time, datetime, time-range, id,
-                //    schema-instance (schema/id),
-                //    recurring-date
-                //
-                //    special types: id, title, users,
-                //    special properties: id, title, owner(users)
-                // card: 1 (default)
-                //
-                // discuss later...cardinality, time ranges
-
                 // "Special" properties
                 title: { },
-
-                description: { display: 'long-text' },
+                owner: { label: "Provider" },
+                description: { format: {preferedLength: 'long-text', defaultLine: 2}, },
                 date: { type: 'date' },
                 time: { type: 'time' },
                 reservations: { type: 'reservations', card: 4, owned: true},
-                slot1: { type: 'reservations' },
-                slot2: { type: 'reservations' },
-                slot3: { type: 'reservations' },
-                slot4: { type: 'reservations' },
                 short: { type: 'formatted', format: "{title}\n{owner} - {date} {hourRange}" },
                 hourRange: {type: 'formatted', format: "{time | time} - {time + 2/24 | time}" }
             }
@@ -60,16 +92,34 @@ ns.appDefinition =  {
             },
             properties: {
                 title: { label: 'Full Name' },
-                owner: { label: 'User Name', unique: true, initialize: "client.username" },
                 email: { label: 'E-Mail' },
                 phone: { label: 'Phone Number' }
             }
         },
 
         reservations: {
+            commands: {
+                cancel: { condition: "status == 'reserved' && owner == self",
+                          action: "status = 'canceled';"},
+                unCancel: { condition: "status == 'canceled' && owner == self",
+                            action: "status = 'available';" },
+                reserve: { condition: "status == 'available' && owner != self",
+                           action: "status = 'reserved'; reserver = self" },
+                unReserve: { condition: "status == 'reserved' && reserver == self",
+                             action: "status = 'available'; reserver = undefined;"}
+            },
+            views: {
+                read: { ordering: [ 'session.short', 'time', 'status', 'reserver',
+                                    { command: 'cancel' },
+                                    { command: 'unCancel' },
+                                    { command: 'reserve' },
+                                    { command: 'unReserve' }
+                                  ] }
+            },
             properties: {
                 session: { type: 'sessions' },
-                time: { compute: "session.time + session.indexOf(this) * 0.5/24",
+                time: { type: time,
+                        compute: "session.time + session.indexOf(this) * 0.5/24",
                         format: "{time | time} - {time + 0.5/24 | time}" },
                 status: { valid: ['available', 'reserved', 'canceled'] },
                 reserver: { type: 'users' },
