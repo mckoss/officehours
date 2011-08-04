@@ -3,8 +3,11 @@
     "officehours-all.js": [
       "namespace-plus.js",
       { "path": "sample-data.js", "namespace": "com.pageforest.officehours.sample-data" },
-      { "path": "main.js", "namespace": "com.pageforest.officehours" },
-      { "path": "forms.js", "namespace": "org.startpad.forms" }
+      { "path": "main.js", "namespace": "com.pageforest.officehours" }
+  ],
+  "appgen-all.js": [
+      "namespace-plus.js",
+      { "path": "appgen.js", "namespace": "com.pageforest.appgen" }
     ]
   },
   "minify": false,
