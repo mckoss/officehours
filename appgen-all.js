@@ -375,20 +375,20 @@ var jQT;
 
 var DEFAULT_APP = "/officehours-app.js";
 var DEFAULT_DATA = "/officehours-data.js";
-var app;
-var data;
+
+// var app; -> app is a GLOBAL in the page - don't define here
 
 var pfApp = {
     onSaveSuccess: function (json) {
     },
 
     setDoc: function (json) {
-        data = json.blob;
+        app.setData(json.blob);
     },
 
     getDoc: function() {
         return {
-            blob: data,
+            blob: app ? app.getData() : {},
             readers: ['public']
         };
     },
@@ -422,6 +422,91 @@ function main() {
     });
 }
 
+function loadApp(appText) {
+    var appDefinition = eval('(' + appText + ')');
+    app = new Application(appDefinition);
+}
+
+function loadData(appData) {
+    data = eval('(' + appData + ')');
+    app.setData(data);
+    $('#jqt').html(app.html());
+}
+
+function Application(appDefinition) {
+    this.setApp(appDefinition);
+}
+
+Application.methods({
+    templates: {
+        page: '<div id="{pageId}" class="current">' +
+            '<div class="toolbar">' +
+            '<h1>{title}</h1>' +
+            '{buttons}' +
+            '</div></div>',
+
+        toolbarButton: '<a class="button" href="{href}" onclick="{onclick}">{label}</a>'
+    },
+
+
+    setApp: function (appDefinition) {
+        types.extend(this, appDefinition);
+        console.log("App loaded", this);
+    },
+
+    setData: function (data) {
+        this.data = data;
+        console.log("Data loaded", data);
+    },
+
+    getData: function (data) {
+        return data;
+    },
+
+    getApp: function () {
+    },
+
+    currentUser: function () {
+        return client.username;
+    },
+
+    signIn: function () {
+        client.signIn();
+    },
+
+    html: function () {
+        return this.renderPage('home');
+    },
+
+    renderPage: function (pageId) {
+        var page = this.pages[pageId];
+        var buttons = "";
+
+        if (page.toolbar) {
+            for (var cmd in page.toolbar) {
+                var command = page.toolbar[cmd];
+                var visible = this.evalCondition(command.condition);
+                if (visible) {
+                    buttons += this.templates.toolbarButton.format(types.extend({href: '#'},
+                                                                                command));
+                }
+            }
+        }
+
+        return this.templates.page.format(types.extend({pageId: pageId,
+                                                        app: this,
+                                                        buttons: buttons}, page));
+    },
+
+    evalCondition: function (condition) {
+        if (condition == undefined) {
+            return true;
+        }
+
+        return eval('(' + condition + ')');
+    }
+});
+
 // For offline - capable applications
 function handleAppCache() {
     if (typeof applicationCache == 'undefined') {
@@ -435,16 +520,6 @@ function handleAppCache() {
     }
 
     applicationCache.addEventListener('updateready', handleAppCache, false);
-}
-
-function loadApp(appText) {
-    app = eval('(' + appText + ')');
-    console.log("App loaded", app);
-}
-
-function loadData(appData) {
-    data = eval('(' + appData + ')');
-    console.log("Data loaded", data);
 }
 
 // Notes about properties

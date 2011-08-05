@@ -55,6 +55,15 @@ Size limit
             "  edit('users', 'this.id == currentUser()');" +
             "}"
     },
+    pages: {
+        home: { title: "Office Hours",
+                toolbar: {
+                    signIn: { label: "Sign In",
+                              condition: "app.currentUser() == undefined",
+                              onclick: "app.signIn()"}
+                }
+        }
+    },
     schema: {
         sessions: {
             commands: {
@@ -84,7 +93,7 @@ Size limit
 
         users: {
             views: {
-                read: { ordering: [ 'title', 'username', 'email', 'phone' ] },
+                read: { title: "{this.title}", ordering: [ 'username', 'email', 'phone' ] },
                 write: { ordering: [ 'title', 'email', 'phone' ] }
             },
             properties: {

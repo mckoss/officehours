@@ -13,6 +13,7 @@
   <style type="text/css" media="screen">@import "/js/jqtouch/jqtouch/jqtouch.css";</style>
   <style type="text/css" media="screen">@import "/js/jqtouch/themes/apple/theme.css";</style>
   <script type="text/javascript">
+    var app;
     $(document).ready(namespace.com.pageforest.appgen.main);
   </script>
 </head>
