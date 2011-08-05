@@ -67,20 +67,22 @@ Size limit
                     myProfile: { label: "My Profile",
                                  condition: "app.currentUser() != undefined",
                                  onclick: "app.viewPage('users', app.currentUser())"}
-                }
+                },
+                properties: []
+
         }
     },
-    schema: {
+    schemas: {
         sessions: {
             commands: {
                 del: { condition: "owner == self", label: "Delete this Office Hour" },
                 create: { label: "Host an Office Hour" }
             },
             views: {
-                read: { ordering: [ 'title', 'description', 'owner', 'date',
+                read: { properties: [ 'title', 'description', 'owner', 'date',
                                     'hour', 'reservation', { command: 'del' } ]},
-                write: {ordering: [ 'title', 'description', 'date', 'hour' ]},
-                list: { ordering: [ 'title', 'owner', 'date', 'hour' ],
+                write: {properties: [ 'title', 'description', 'date', 'hour' ]},
+                list: { properties: [ 'title', 'owner', 'date', 'hour' ],
                         format: "{title}\n{owner} - {date} " }
             },
 
@@ -99,8 +101,8 @@ Size limit
 
         users: {
             views: {
-                read: { title: "{this.title}", ordering: [ 'username', 'email', 'phone' ] },
-                write: { ordering: [ 'title', 'email', 'phone' ] }
+                read: { title: "{this.title}", properties: [ 'username', 'email', 'phone' ] },
+                write: { properties: [ 'title', 'email', 'phone' ] }
             },
             properties: {
                 title: { label: 'Full Name' },
@@ -121,7 +123,7 @@ Size limit
                              action: "status = 'available'; reserver = undefined;"}
             },
             views: {
-                read: { ordering: [ 'session.short', 'time', 'status', 'reserver',
+                read: { properties: [ 'session.short', 'time', 'status', 'reserver',
                                     { command: 'cancel' },
                                     { command: 'unCancel' },
                                     { command: 'reserve' },
