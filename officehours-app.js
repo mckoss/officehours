@@ -60,7 +60,13 @@ Size limit
                 toolbar: {
                     signIn: { label: "Sign In",
                               condition: "app.currentUser() == undefined",
-                              onclick: "app.signIn()"}
+                              onclick: "app.signIn()"},
+                    signOut: { label: "Sign Out",
+                              condition: "app.currentUser() != undefined",
+                              onclick: "app.signOut()"},
+                    myProfile: { label: "My Profile",
+                                 condition: "app.currentUser() != undefined",
+                                 onclick: "app.viewPage('users', app.currentUser())"}
                 }
         }
     },

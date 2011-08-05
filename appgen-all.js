@@ -383,7 +383,7 @@ var pfApp = {
     },
 
     setDoc: function (json) {
-        app.setData(json.blob);
+        // app.setData(json.blob);
     },
 
     getDoc: function() {
@@ -394,6 +394,9 @@ var pfApp = {
     },
 
     onUserChange: function() {
+        if (app) {
+            app.updatePages();
+        }
     }
 };
 
@@ -430,7 +433,7 @@ function loadApp(appText) {
 function loadData(appData) {
     data = eval('(' + appData + ')');
     app.setData(data);
-    $('#jqt').html(app.html());
+    app.updatePages();
 }
 
 function Application(appDefinition) {
@@ -447,7 +450,6 @@ Application.methods({
 
         toolbarButton: '<a class="button" href="{href}" onclick="{onclick}">{label}</a>'
     },
-
 
     setApp: function (appDefinition) {
         types.extend(this, appDefinition);
@@ -466,12 +468,20 @@ Application.methods({
     getApp: function () {
     },
 
+    updatePages: function () {
+        $('#jqt').html(app.html());
+    },
+
     currentUser: function () {
         return client.username;
     },
 
     signIn: function () {
         client.signIn();
+    },
+
+    signOut: function () {
+        client.signOut();
     },
 
     html: function () {
