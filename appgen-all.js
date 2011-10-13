@@ -393,6 +393,10 @@ var pfApp = {
         };
     },
 
+    getDocid: function () {
+        return undefined;
+    },
+
     onUserChange: function() {
         if (app) {
             app.updatePages();
@@ -403,13 +407,6 @@ var pfApp = {
 function main() {
     handleAppCache();
     client = new clientLib.Client(pfApp);
-
-    jQT = new $.jQTouch({
-        icon: 'jqtouch.png',
-        addGlossToIcon: false,
-        startupScreen: 'jqt_startup.png',
-        statusBar: 'black'
-    });
 
     $.ajax({
         url: DEFAULT_APP,
@@ -434,6 +431,15 @@ function loadData(appData) {
     data = eval('(' + appData + ')');
     app.setData(data);
     app.updatePages();
+
+    // jQTouch - piece of shit - needs to be initialized AFTER document is loaded
+    // is there any way to deal with dynamic pages???
+    jQT = new $.jQTouch({
+        icon: 'jqtouch.png',
+        addGlossToIcon: false,
+        startupScreen: 'jqt_startup.png',
+        statusBar: 'black'
+    });
 }
 
 function Application(appDefinition) {
@@ -442,11 +448,11 @@ function Application(appDefinition) {
 
 Application.methods({
     templates: {
-        page: '<div id="{pageId}" class="{class}">' +
+        page: '<div id="{pageId}" class="{class}" section="full">' +
             '  <div class="toolbar"><h1>{title}</h1>{buttons}</div>' +
             '</div>',
 
-        viewPage: '<div id="{id}-{view}">' +
+        viewPage: '<div id="{id}-{view}" section="full">' +
             '  <div class="toolbar"><h1>{title}</h1>{buttons}</div>' +
             '  {properties}' +
             '</div>',
@@ -504,6 +510,14 @@ Application.methods({
 
     signOut: function () {
         client.signOut();
+    },
+
+    gotoInstance: function(schemaName, id, mode) {
+        if (mode == undefined) {
+            mode = 'read';
+        }
+        // TODO: prefix with schemaName for uniqueness
+        jQT.goTo('#' + id + '-' + mode);
     },
 
     html: function () {
@@ -572,7 +586,7 @@ Application.methods({
             var visible = this.evalCondition(command.condition);
             if (visible) {
                 result += this.templates.toolbarButton.format(types.extend({href: '#',
-                                                                             'class': 'button'},
+                                                                            'class': 'button'},
                                                                             command));
             }
         }

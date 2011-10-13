@@ -66,7 +66,7 @@ Size limit
                               onclick: "app.signOut()"},
                     myProfile: { label: "My Profile",
                                  condition: "app.currentUser() != undefined",
-                                 onclick: "app.viewPage('users', app.currentUser())"}
+                                 onclick: "app.gotoInstance('users', app.currentUser())"}
                 },
                 properties: []
 
