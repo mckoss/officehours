@@ -79,7 +79,7 @@ function Application(appDefinition) {
 
 Application.methods({
     templates: {
-        page: '<div id="{pageId}">' +
+        page: '<div id="{pageId}" class="{class}">' +
             '  <div class="toolbar"><h1>{title}</h1>{buttons}</div>' +
             '</div>',
 
@@ -88,7 +88,9 @@ Application.methods({
             '  {properties}' +
             '</div>',
 
-        toolbarButton: '<a class="{class}" href="{href}" onclick="{onclick}">{label}</a>'
+        toolbarButton: '<a class="{class}" href="{href}" onclick="{onclick}">{label}</a>',
+
+        propertyLine: '<p>{name}: {value}</p>'
     },
 
     defaultToolbars: {
@@ -122,6 +124,7 @@ Application.methods({
     },
 
     getApp: function () {
+        // TODO: Return projection of application definition properties
     },
 
     updatePages: function () {
@@ -163,18 +166,24 @@ Application.methods({
         var buttons = this.renderToolbarButtons(this.defaultToolbars.read);
         for (var key in instances) {
             var instance = instances[key];
+            // TODO: Render write views as well???
             var properties = this.renderProperties(schema, instance, schema.views.read.properties);
             result += this.templates.viewPage.format({app: this,
+                                                      id: key,
+                                                      view: 'read',
                                                       buttons: buttons,
                                                       properties: properties});
         }
         return result;
     },
 
+    // Render a subset of the properties of an instance.
     renderProperties: function (schema, instance, properties) {
         var result = "";
         for (var i = 0; i < properties.length; i++) {
-            result += '<p>' + properties[i] + '</p>';
+            // TODO: Use datatype specific formatting for each property (and mode?)
+            result += this.templates.propertyLine.format({name: properties[i],
+                                                          value: instance[properties[i]]});
         }
         return result;
     },
@@ -183,6 +192,7 @@ Application.methods({
         var page = this.pages[pageId];
         var buttons = this.renderToolbarButtons(page.toolbar);
 
+        // TODO: Hack - not all pages are "current"
         return this.templates.page.format(types.extend({pageId: pageId,
                                                         app: this,
                                                         'class': 'current',
@@ -229,51 +239,3 @@ function handleAppCache() {
 
     applicationCache.addEventListener('updateready', handleAppCache, false);
 }
-
-// Notes about properties
-// id: The unique (internal) name of a property in a schema
-// label: Text to display next to value in forms - defaults to capitalized 'name'
-// type: Underlying datatype for storing the property's value
-//    number, string (default), date, time, datetime, time-range, id,
-//    schema-instance (schema/id),
-//    recurring-date
-//
-// card: 0-1 (default)
-
-/*
-
-Properties in every schema:
-
-id: {type: string},
-owner: The creator of an instance.
-   Default definition { type: users } (the type cannot be changed).
-short: This property is used to display references to instances.
-   Default definition is { format: "{title}" }
-
-Optional special properties:
-
-title: Optional default title of an instance
-
-users is a special schema which always exists (id == username)
-
-The default 'short' format is title alone.
-
-Attributes of properties:
-
-type:
-format:
-compute:
-label:
-
-Datatype Universe
-
-Basic Types: number, string (255), text(string any length), date, time,
-   datetime, instance (stored as id of target), boolean, enumerated
-Future basic types:   file (blob), image, video, audio
-Extend Types: currency (number), long-text, phone number, address, email address, url,
-   person's name, zip code, rich text (html),
-Size limit
-
-
-*/
-
