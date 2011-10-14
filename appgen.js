@@ -96,7 +96,11 @@ Application.methods({
 
         toolbarButton: '<a href="{href}" onclick="{onclick}" data-rel="{dataRel}">{label}</a>',
 
-        propertyLine: '<li><label>{name}</label>: {value}</li>'
+        propertyLine:
+            '<li><div data-role="fieldcontain">' +
+            '    <label class="ui-input-text" for="{name}">{name}:</label>' +
+            '    <input type="text" readonly name="{name}" value="{value}"/>' +
+            '</div></li>'
     },
 
     defaultToolbars: {
