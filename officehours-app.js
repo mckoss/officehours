@@ -101,10 +101,11 @@ Size limit
 
         users: {
             views: {
-                read: { title: "{this.title}", properties: [ 'username', 'email', 'phone' ] },
+                read: { title: "{this.title}", properties: [ 'owner', 'email', 'phone' ] },
                 write: { properties: [ 'title', 'email', 'phone' ] }
             },
             properties: {
+                owner: { label: 'Username' },
                 title: { label: 'Full Name' },
                 email: { label: 'E-Mail' },
                 phone: { label: 'Phone Number' }

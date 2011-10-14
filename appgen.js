@@ -98,8 +98,8 @@ Application.methods({
 
         propertyLine:
             '<li><div data-role="fieldcontain">' +
-            '    <label class="ui-input-text" for="{name}">{name}:</label>' +
-            '    <input type="text" readonly name="{name}" value="{value}"/>' +
+            '    <label class="ui-input-text" for="{label}">{label}:</label>' +
+            '    <span>{value}</span>' +
             '</div></li>'
     },
 
@@ -203,7 +203,12 @@ Application.methods({
         var result = "";
         for (var i = 0; i < properties.length; i++) {
             // TODO: Use datatype specific formatting for each property (and mode?)
-            result += this.templates.propertyLine.format({name: properties[i],
+            var label = properties[i];
+            var propertyDef = schema.properties[properties[i]];
+            if (propertyDef && propertyDef.label) {
+                label = propertyDef.label;
+            }
+            result += this.templates.propertyLine.format({label: label,
                                                           value: instance[properties[i]]});
         }
         return result;
