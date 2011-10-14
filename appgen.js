@@ -88,13 +88,15 @@ Application.methods({
             '<div id="{id}-{view}" data-role="page">' +
             '  <div data-role="header"><h1>{title}</h1>{buttons}</div>' +
             '    <div data-role="content">' +
+            '      <ul data-role="listview">' +
             '      {properties}' +
+            '      </ul>' +
             '    </div>' +
             '</div>',
 
         toolbarButton: '<a href="{href}" onclick="{onclick}" data-rel="{dataRel}">{label}</a>',
 
-        propertyLine: '<p>{name}: {value}</p>'
+        propertyLine: '<li><label>{name}</label>: {value}</li>'
     },
 
     defaultToolbars: {
