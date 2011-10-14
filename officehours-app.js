@@ -68,7 +68,9 @@ Size limit
                                  condition: "app.currentUser() != undefined",
                                  onclick: "app.gotoInstance('users', app.currentUser())"}
                 },
-                properties: []
+                properties: [{ view: 'list', schema: 'sessions' },
+                             { command: 'create', schema: 'sessions' },
+                             { link: 'my-appointments', schema: 'users'}]
 
         }
     },
@@ -82,8 +84,7 @@ Size limit
                 read: { properties: [ 'description', 'owner', 'date',
                                     'hour', 'reservation', { command: 'del' } ]},
                 write: {properties: [ 'title', 'description', 'date', 'hour' ]},
-                list: { properties: [ 'title', 'owner', 'date', 'hour' ],
-                        format: "{title}\n{owner} - {date} " }
+                list: { format: "{title}<br/>{owner} - {date}" }
             },
 
             properties: {

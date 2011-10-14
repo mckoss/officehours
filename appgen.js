@@ -100,7 +100,11 @@ Application.methods({
             '<li><div data-role="fieldcontain">' +
             '    <label class="ui-input-text" for="{label}">{label}:</label>' +
             '    <span>{value}</span>' +
-            '</div></li>'
+            '</div></li>',
+
+        list: '<ul data-role="listview">{content}</ul>',
+
+        listLine: '<li><a href="#{key}-read">{item}</a></li>'
     },
 
     defaultToolbars: {
@@ -199,23 +203,47 @@ Application.methods({
         return result;
     },
 
+    renderInstance: function(schema, view, instance) {
+        if (view.format) {
+            return view.format.format(instance);
+        }
+        return this.renderProperties(schema, instance, view.properties);
+    },
+
+    renderList: function(schemaName, viewName) {
+        var result = "";
+        var schema = this.schemas[schemaName];
+        var instances = this.data[schemaName];
+        var view = schema.views[viewName];
+        for (var key in instances) {
+            var item = this.renderInstance(schema, view, instances[key]);
+            result += this.templates.listLine.format({item: item, schema: schemaName, key: key});
+        }
+        return this.templates.list.format({content: result});
+    },
+
     // Render a subset of the properties of an instance.
     renderProperties: function (schema, instance, properties) {
         var result = "";
         for (var i = 0; i < properties.length; i++) {
             // TODO: Use datatype specific formatting for each property (and mode?)
             var label = properties[i];
-            if (typeof(label) != 'string') {
-                // TODO: Support for command objects in properties list
-                continue;
+            if (typeof(label) == 'string') {
+                label = label[0].toUpperCase() + label.slice(1);
+                var propertyDef = schema.properties[properties[i]];
+                if (propertyDef && propertyDef.label) {
+                    label = propertyDef.label;
+                }
+                result += this.templates.propertyLine.format({label: label,
+                                                              value: instance[properties[i]]});
+            } else if (label.view) {
+                result += this.renderList(label.schema, label.view);
+            } else if (label.command) {
+                console.log("Command NYI", label);
+                result += "<div>Command: {command}</div>".format(label);
+            } else {
+                console.log("Unknown property", label);
             }
-            label = label[0].toUpperCase() + label.slice(1);
-            var propertyDef = schema.properties[properties[i]];
-            if (propertyDef && propertyDef.label) {
-                label = propertyDef.label;
-            }
-            result += this.templates.propertyLine.format({label: label,
-                                                          value: instance[properties[i]]});
         }
         return result;
     },
@@ -224,11 +252,11 @@ Application.methods({
         var page = this.pages[pageId];
         var buttons = this.renderToolbarButtons(page.toolbar);
 
-        // TODO: Hack - not all pages are "current"
+        var content = this.renderProperties(undefined, undefined, page.properties);
         return this.templates.page.format(types.extend({pageId: pageId,
                                                         app: this,
-                                                        'class': 'current',
-                                                        buttons: buttons}, page));
+                                                        buttons: buttons,
+                                                        content: content}, page));
     },
 
     renderToolbarButtons: function (toolbar) {
