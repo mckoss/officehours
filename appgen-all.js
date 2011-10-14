@@ -371,8 +371,6 @@ exports.extend({
     'main': main
 });
 
-var jQT;
-
 var DEFAULT_APP = "/officehours-app.js";
 var DEFAULT_DATA = "/officehours-data.js";
 
@@ -405,6 +403,8 @@ var pfApp = {
 };
 
 function main() {
+    $.mobile.autoInitializePage = false;
+
     handleAppCache();
     client = new clientLib.Client(pfApp);
 
@@ -431,15 +431,6 @@ function loadData(appData) {
     data = eval('(' + appData + ')');
     app.setData(data);
     app.updatePages();
-
-    // jQTouch - piece of shit - needs to be initialized AFTER document is loaded
-    // is there any way to deal with dynamic pages???
-    jQT = new $.jQTouch({
-        icon: 'jqtouch.png',
-        addGlossToIcon: false,
-        startupScreen: 'jqt_startup.png',
-        statusBar: 'black'
-    });
 }
 
 function Application(appDefinition) {
@@ -448,13 +439,20 @@ function Application(appDefinition) {
 
 Application.methods({
     templates: {
-        page: '<div id="{pageId}" class="{class}" section="full">' +
-            '  <div class="toolbar"><h1>{title}</h1>{buttons}</div>' +
+        page:
+            '<div id="{pageId}" data-role="page">' +
+            '  <div data-role="header"><h1>{title}</h1>{buttons}</div>' +
+            '    <div data-role="content">' +
+            '      {content}' +
+            '    </div>' +
             '</div>',
 
-        viewPage: '<div id="{id}-{view}" section="full">' +
-            '  <div class="toolbar"><h1>{title}</h1>{buttons}</div>' +
-            '  {properties}' +
+        viewPage:
+            '<div id="{id}-{view}" data-role="page">' +
+            '  <div data-role="header"><h1>{title}</h1>{buttons}</div>' +
+            '    <div data-role="content">' +
+            '      {properties}' +
+            '    </div>' +
             '</div>',
 
         toolbarButton: '<a class="{class}" href="{href}" onclick="{onclick}">{label}</a>',
@@ -497,7 +495,10 @@ Application.methods({
     },
 
     updatePages: function () {
-        $('#jqt').html(app.html());
+        $.mobile.activePage = undefined;
+        $('body').html(app.html());
+        $.mobile.initializePage();
+        $.mobile.changePage('#home');
     },
 
     currentUser: function () {
@@ -517,7 +518,7 @@ Application.methods({
             mode = 'read';
         }
         // TODO: prefix with schemaName for uniqueness
-        jQT.goTo('#' + id + '-' + mode);
+        $.mobile.changePage($('#' + id + '-' + mode));
     },
 
     html: function () {
