@@ -11,8 +11,6 @@ exports.extend({
 var DEFAULT_APP = "/officehours-app.js";
 var DEFAULT_DATA = "/officehours-data.js";
 
-// var app; -> app is a GLOBAL in the page - don't define here
-
 var pfApp = {
     onSaveSuccess: function (json) {
     },
@@ -61,6 +59,7 @@ function main() {
 
 function loadApp(appText) {
     var appDefinition = eval('(' + appText + ')');
+    // Global app variable
     app = new Application(appDefinition);
 }
 
@@ -106,8 +105,9 @@ Application.methods({
 
         listLine: '<li><a href="#{key}-read">{item}</a></li>',
 
-        commandLine: '<input type="button" data-theme="b" onclick="app.DoCommand(\'{command}\');"' +
-                     ' value="{label}"/>'
+        commandLine: '<input type="button" data-theme="b" ' +
+                     'onclick="app.doCommand(\'{schema}\', \'{command}\');" ' +
+                     'value="{label}"/>'
     },
 
     defaultToolbars: {
@@ -115,14 +115,14 @@ Application.methods({
             back: { label: "Back", dataRel: 'back' },
             edit: { label: "Edit",
                     condition: "app.currentUser() != undefined",
-                    href: "#{id}-write" }
+                    href: "#{key}-write" }
         },
 
         write: {
             back: { label: "Back", dataRel: 'back' },
             save: { label: "Save",
-                    href: "#{id}-read",
-                    onclick: "app.saveInstance('{schema}', '{id}')" }
+                    href: "#{key}-read",
+                    onclick: "app.saveInstance('{schema}', '{key}')" }
         }
     },
 
@@ -136,8 +136,8 @@ Application.methods({
         console.log("Data loaded", data);
     },
 
-    getData: function (data) {
-        return data;
+    getData: function () {
+        return this.data;
     },
 
     getApp: function () {
@@ -168,6 +168,16 @@ Application.methods({
         }
         // TODO: prefix with schemaName for uniqueness
         $.mobile.changePage($('#' + id + '-' + mode));
+    },
+
+    doCommand: function(schemaName, commandName) {
+        var schema = this.schemas[schemaName];
+        var command = schema.commands[commandName];
+        if (!this.action) {
+            console.log("No command action for " + schemaName + '.' + commandName);
+            return;
+        }
+        eval('(' + command.action + ')');
     },
 
     html: function () {
@@ -258,7 +268,9 @@ Application.methods({
         var schema = this.schemas[schemaName];
         var command = schema.commands[commandName];
         var label = command.label || commandName[0].toUpperCase() + commandName.slice(1);
-        return this.templates.commandLine.format({label: label, command: commandName});
+        return this.templates.commandLine.format({label: label,
+                                                  schema: schemaName,
+                                                  command: commandName});
     },
 
     renderPage: function (pageId) {
