@@ -102,12 +102,12 @@ Application.methods({
             '    <span>{value}</span>' +
             '</div></li>',
 
-        list: '<ul data-role="listview">{content}</ul>',
+        list: '<ul data-role="listview" data-inset="true">{content}</ul>',
 
         listLine: '<li><a href="#{key}-read">{item}</a></li>',
 
-        commandLine: '<li><input type="button" data-theme="b" onclick="app.DoCommand(\'{command}\');"' +
-                     ' value="{label}"/></li>'
+        commandLine: '<input type="button" data-theme="b" onclick="app.DoCommand(\'{command}\');"' +
+                     ' value="{label}"/>'
     },
 
     defaultToolbars: {
@@ -246,8 +246,7 @@ Application.methods({
                 result += this.renderList(label.schema, label.view);
             } else if (label.command) {
                 // BUG: Sometimes renders a command in a double list
-                var content = this.renderCommand(label.schema || schemaName, label.command);
-                result += this.templates.list.format({content: content});
+                result += this.renderCommand(label.schema || schemaName, label.command);
             } else {
                 console.log("Unknown property", label);
             }
