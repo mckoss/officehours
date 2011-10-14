@@ -79,7 +79,7 @@ Size limit
                 create: { label: "Host an Office Hour" }
             },
             views: {
-                read: { properties: [ 'title', 'description', 'owner', 'date',
+                read: { properties: [ 'description', 'owner', 'date',
                                     'hour', 'reservation', { command: 'del' } ]},
                 write: {properties: [ 'title', 'description', 'date', 'hour' ]},
                 list: { properties: [ 'title', 'owner', 'date', 'hour' ],
@@ -101,7 +101,7 @@ Size limit
 
         users: {
             views: {
-                read: { title: "{this.title}", properties: [ 'owner', 'email', 'phone' ] },
+                read: { properties: [ 'owner', 'email', 'phone' ] },
                 write: { properties: [ 'title', 'email', 'phone' ] }
             },
             properties: {

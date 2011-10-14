@@ -141,7 +141,6 @@ Application.methods({
         $.mobile.activePage = undefined;
         $('body').html(app.html());
         $.mobile.initializePage();
-        $.mobile.changePage('#home');
     },
 
     currentUser: function () {
@@ -183,13 +182,15 @@ Application.methods({
     renderInstances: function (schemaName) {
         var result = "";
         var schema = this.schemas[schemaName];
+        // TODO: Render write view too
+        var view = schema.views.read;
         var instances = this.data[schemaName];
         var buttons = this.renderToolbarButtons(this.defaultToolbars.read);
         for (var key in instances) {
             var instance = instances[key];
-            // TODO: Render write views as well???
-            var properties = this.renderProperties(schema, instance, schema.views.read.properties);
+            var properties = this.renderProperties(schema, instance, view.properties);
             result += this.templates.viewPage.format({app: this,
+                                                      title: instance.title,
                                                       id: key,
                                                       view: 'read',
                                                       buttons: buttons,
@@ -204,6 +205,11 @@ Application.methods({
         for (var i = 0; i < properties.length; i++) {
             // TODO: Use datatype specific formatting for each property (and mode?)
             var label = properties[i];
+            if (typeof(label) != 'string') {
+                // TODO: Support for command objects in properties list
+                continue;
+            }
+            label = label[0].toUpperCase() + label.slice(1);
             var propertyDef = schema.properties[properties[i]];
             if (propertyDef && propertyDef.label) {
                 label = propertyDef.label;
