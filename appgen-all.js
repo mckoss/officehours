@@ -455,21 +455,21 @@ Application.methods({
             '    </div>' +
             '</div>',
 
-        toolbarButton: '<a class="{class}" href="{href}" onclick="{onclick}">{label}</a>',
+        toolbarButton: '<a href="{href}" onclick="{onclick}" data-rel="{dataRel}">{label}</a>',
 
         propertyLine: '<p>{name}: {value}</p>'
     },
 
     defaultToolbars: {
         read: {
-            back: { label: "Back", 'class': 'back' },
+            back: { label: "Back", dataRel: 'back' },
             edit: { label: "Edit",
                     condition: "app.currentUser() != undefined",
                     href: "#{id}-write" }
         },
 
         write: {
-            back: { label: "Back", 'class': 'back' },
+            back: { label: "Back", dataRel: 'back' },
             save: { label: "Save",
                     href: "#{id}-read",
                     onclick: "app.saveInstance('{schema}', '{id}')" }
