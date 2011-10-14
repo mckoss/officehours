@@ -251,7 +251,6 @@ Application.methods({
     renderPage: function (pageId) {
         var page = this.pages[pageId];
         var buttons = this.renderToolbarButtons(page.toolbar);
-
         var content = this.renderProperties(undefined, undefined, page.properties);
         return this.templates.page.format(types.extend({pageId: pageId,
                                                         app: this,
@@ -268,9 +267,8 @@ Application.methods({
             var command = toolbar[cmd];
             var visible = this.evalCondition(command.condition);
             if (visible) {
-                result += this.templates.toolbarButton.format(types.extend({href: '#',
-                                                                            'class': 'button'},
-                                                                            command));
+                result += this.templates.toolbarButton.format(types.extend({href: '#'},
+                                                                           command));
             }
         }
         return result;
