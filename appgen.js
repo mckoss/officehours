@@ -89,7 +89,7 @@ Application.methods({
             '  <div data-role="header"><h1>{title}</h1>{buttons}</div>' +
             '    <div data-role="content">' +
             '      <ul data-role="listview">' +
-            '      {properties}' +
+            '      {content}' +
             '      </ul>' +
             '    </div>' +
             '</div>',
@@ -104,7 +104,10 @@ Application.methods({
 
         list: '<ul data-role="listview">{content}</ul>',
 
-        listLine: '<li><a href="#{key}-read">{item}</a></li>'
+        listLine: '<li><a href="#{key}-read">{item}</a></li>',
+
+        commandLine: '<li><input type="button" data-theme="b" onclick="app.DoCommand(\'{command}\');"' +
+                     ' value="{label}"/></li>'
     },
 
     defaultToolbars: {
@@ -192,22 +195,22 @@ Application.methods({
         var buttons = this.renderToolbarButtons(this.defaultToolbars.read);
         for (var key in instances) {
             var instance = instances[key];
-            var properties = this.renderProperties(schema, instance, view.properties);
+            var content = this.renderInstance(schemaName, view, instance);
             result += this.templates.viewPage.format({app: this,
                                                       title: instance.title,
                                                       id: key,
                                                       view: 'read',
                                                       buttons: buttons,
-                                                      properties: properties});
+                                                      content: content});
         }
         return result;
     },
 
-    renderInstance: function(schema, view, instance) {
+    renderInstance: function(schemaName, view, instance) {
         if (view.format) {
             return view.format.format(instance);
         }
-        return this.renderProperties(schema, instance, view.properties);
+        return this.renderProperties(schemaName, instance, view.properties);
     },
 
     renderList: function(schemaName, viewName) {
@@ -223,11 +226,14 @@ Application.methods({
     },
 
     // Render a subset of the properties of an instance.
-    renderProperties: function (schema, instance, properties) {
+    renderProperties: function (schemaName, instance, properties) {
         var result = "";
+        var label;
+        var schema = schemaName && this.schemas[schemaName];
+
         for (var i = 0; i < properties.length; i++) {
             // TODO: Use datatype specific formatting for each property (and mode?)
-            var label = properties[i];
+            label = properties[i];
             if (typeof(label) == 'string') {
                 label = label[0].toUpperCase() + label.slice(1);
                 var propertyDef = schema.properties[properties[i]];
@@ -239,13 +245,21 @@ Application.methods({
             } else if (label.view) {
                 result += this.renderList(label.schema, label.view);
             } else if (label.command) {
-                console.log("Command NYI", label);
-                result += "<div>Command: {command}</div>".format(label);
+                // BUG: Sometimes renders a command in a double list
+                var content = this.renderCommand(label.schema || schemaName, label.command);
+                result += this.templates.list.format({content: content});
             } else {
                 console.log("Unknown property", label);
             }
         }
         return result;
+    },
+
+    renderCommand: function(schemaName, commandName) {
+        var schema = this.schemas[schemaName];
+        var command = schema.commands[commandName];
+        var label = command.label || commandName[0].toUpperCase() + commandName.slice(1);
+        return this.templates.commandLine.format({label: label, command: commandName});
     },
 
     renderPage: function (pageId) {
