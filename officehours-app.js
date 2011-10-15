@@ -82,7 +82,7 @@ Size limit
             properties: {
                 // "Special" properties
                 title: { },
-                owner: { label: "Provider" },
+                owner: { type: "users", label: "Provider" },
                 description: { format: {preferedLength: 'long-text', defaultLine: 2}, },
                 date: { type: 'date' },
                 time: { type: 'time' },
@@ -99,7 +99,7 @@ Size limit
                 write: { properties: [ 'title', 'email', 'phone' ] }
             },
             properties: {
-                owner: { label: 'Username' },
+                owner: { type: "users", label: 'Username' },
                 title: { label: 'Full Name' },
                 email: { label: 'E-Mail' },
                 phone: { label: 'Phone Number' }

@@ -129,6 +129,10 @@ Application.methods({
         }
     },
 
+    defaultViews: {
+        list: { format: "{title}" }
+    },
+
     setApp: function (appDefinition) {
         types.extend(this, appDefinition);
         console.log("App loaded", this);
@@ -199,7 +203,7 @@ Application.methods({
         var result = "";
         var schema = this.schemas[schemaName];
         // TODO: Render write view too
-        var view = schema.views.read;
+        var view = this.getView(schema, 'read');
         var instances = this.data[schemaName];
         // TODO: Move inside loop if toolbar buttons could depend on instance state
         var buttons = this.renderToolbarButtons(this.defaultToolbars.read);
@@ -223,16 +227,24 @@ Application.methods({
         return this.renderProperties(schemaName, instance, view.properties);
     },
 
-    renderList: function(schemaName, viewName) {
+    renderList: function(schemaName, viewName, keys) {
         var result = "";
         var schema = this.schemas[schemaName];
         var instances = this.data[schemaName];
-        var view = schema.views[viewName];
-        for (var key in instances) {
+        var view = this.getView(schema, viewName);
+        if (!keys) {
+            keys = Object.keys(instances);
+        }
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
             var item = this.renderInstance(schema, view, instances[key]);
             result += this.templates.listLine.format({item: item, schema: schemaName, key: key});
         }
         return this.templates.list.format({content: result});
+    },
+
+    getView: function(schema, viewName) {
+        return schema.views[viewName] || this.defaultViews[viewName] || this.defaultViews['list'];
     },
 
     // Render a subset of the properties of an instance.
@@ -265,17 +277,21 @@ Application.methods({
     },
 
     renderProperty: function(value, propertyDef) {
+        if (value == undefined) {
+            return '';
+        }
+
         var schema = this.schemas[propertyDef.type];
         if (!schema) {
             // TODO: Type-specific rendering
-            if (value == undefined) {
-                return '';
-            }
             return value.toString();
         }
 
-        // TODO: Render references to other items.
-        return "NYI";
+        if (typeof value == 'string') {
+            value = [value];
+        }
+
+        return this.renderList(propertyDef.type, 'list', value);
     },
 
     renderPage: function (pageId) {
