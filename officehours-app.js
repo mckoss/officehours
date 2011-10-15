@@ -46,15 +46,6 @@ Size limit
 */
 
 {
-    events: {
-        // Do all apps just inherit a users table with this default behavior?
-        onUserChange: "if (!currentUser()) { self = undefined; return; }" +
-            "self = lookup('users', 'this.id == currentUser()');" +
-            "if (!self) {" +
-            "  self = create('users', {id: currentUser()});" +
-            "  edit('users', 'this.id == currentUser()');" +
-            "}"
-    },
     pages: {
         home: { title: "Office Hours",
                 toolbar: {
