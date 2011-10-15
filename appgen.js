@@ -10,6 +10,7 @@ exports.extend({
 
 var DEFAULT_APP = "/officehours-app.js";
 var DEFAULT_DATA = "/officehours-data.js";
+var STRING_PROPERTY = { type: 'string' };
 
 var pfApp = {
     onSaveSuccess: function (json) {
@@ -30,8 +31,9 @@ var pfApp = {
         return undefined;
     },
 
-    onUserChange: function() {
+    onUserChange: function(user) {
         if (app) {
+            app.user = user;
             app.updatePages();
         }
     }
@@ -41,7 +43,7 @@ function main() {
     $.mobile.autoInitializePage = false;
 
     handleAppCache();
-    client = new clientLib.Client(pfApp);
+    client = new clientLib.Client(pfApp, {saveInterval: 0});
 
     $.ajax({
         url: DEFAULT_APP,
@@ -202,6 +204,7 @@ Application.methods({
         // TODO: Render write view too
         var view = schema.views.read;
         var instances = this.data[schemaName];
+        // TODO: Move inside loop if toolbar buttons could depend on instance state
         var buttons = this.renderToolbarButtons(this.defaultToolbars.read);
         for (var key in instances) {
             var instance = instances[key];
@@ -239,6 +242,7 @@ Application.methods({
     renderProperties: function (schemaName, instance, properties) {
         var result = "";
         var label;
+        var value;
         var schema = schemaName && this.schemas[schemaName];
 
         for (var i = 0; i < properties.length; i++) {
@@ -246,17 +250,16 @@ Application.methods({
             label = properties[i];
             if (typeof(label) == 'string') {
                 label = label[0].toUpperCase() + label.slice(1);
-                var propertyDef = schema.properties[properties[i]];
-                if (propertyDef && propertyDef.label) {
+                var propertyDef = schema.properties[properties[i]] || STRING_PROPERTY;
+                if (propertyDef.label) {
                     label = propertyDef.label;
                 }
-                result += this.templates.propertyLine.format({label: label,
-                                                              value: instance[properties[i]]});
+                value = this.renderProperty(instance[properties[i]], propertyDef);
+                result += this.templates.propertyLine.format({label: label, value: value});
             } else if (label.view) {
                 result += this.renderList(label.schema, label.view);
             } else if (label.command) {
-                // BUG: Sometimes renders a command in a double list
-                result += this.renderCommand(label.schema || schemaName, label.command);
+                result += this.renderCommand(label.schema || schemaName, label.command, instance);
             } else {
                 console.log("Unknown property", label);
             }
@@ -264,13 +267,18 @@ Application.methods({
         return result;
     },
 
-    renderCommand: function(schemaName, commandName) {
-        var schema = this.schemas[schemaName];
-        var command = schema.commands[commandName];
-        var label = command.label || commandName[0].toUpperCase() + commandName.slice(1);
-        return this.templates.commandLine.format({label: label,
-                                                  schema: schemaName,
-                                                  command: commandName});
+    renderProperty: function(value, propertyDef) {
+        var schema = this.schemas[propertyDef.type];
+        if (!schema) {
+            // TODO: Type-specific rendering
+            if (value == undefined) {
+                return '';
+            }
+            return value.toString();
+        }
+
+        // TODO: Render references to other items.
+        return "NYI";
     },
 
     renderPage: function (pageId) {
@@ -299,7 +307,20 @@ Application.methods({
         return result;
     },
 
-    evalCondition: function (condition) {
+    renderCommand: function(schemaName, commandName, instance) {
+        var schema = this.schemas[schemaName];
+        var command = schema.commands[commandName];
+        var label = command.label || commandName[0].toUpperCase() + commandName.slice(1);
+        var visible = this.evalCondition(command.condition, instance);
+        if (!visible) {
+            return '';
+        }
+        return this.templates.commandLine.format({label: label,
+                                                  schema: schemaName,
+                                                  command: commandName});
+    },
+
+    evalCondition: function (condition, item) {
         if (condition == undefined) {
             return true;
         }

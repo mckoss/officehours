@@ -68,6 +68,7 @@ Size limit
                                  condition: "app.currentUser() != undefined",
                                  onclick: "app.gotoInstance('users', app.currentUser())"}
                 },
+                // TODO: Better name for this list of display items
                 properties: [{ view: 'list', schema: 'sessions' },
                              { command: 'create', schema: 'sessions' },
                              { link: 'my-appointments', schema: 'users'}]
@@ -77,7 +78,7 @@ Size limit
     schemas: {
         sessions: {
             commands: {
-                del: { condition: "owner == self", label: "Delete this Office Hour" },
+                del: { condition: "item.owner == app.user", label: "Delete this Office Hour" },
                 create: { label: "Host an Office Hour" }
             },
             views: {
@@ -95,8 +96,9 @@ Size limit
                 date: { type: 'date' },
                 time: { type: 'time' },
                 reservations: { type: 'reservations', card: 4, owned: true},
-                short: { type: 'formatted', format: "{title}\n{owner} - {date} {hourRange}" },
-                hourRange: {type: 'formatted', format: "{time | time} - {time + 2/24 | time}" }
+                // Define supporting fields before their dependents.
+                hourRange: {type: 'formatted', format: "{time | time} - {time + 2/24 | time}" },
+                short: { type: 'formatted', format: "{title}\n{owner} - {date} {hourRange}" }
             }
         },
 
@@ -115,14 +117,18 @@ Size limit
 
         reservations: {
             commands: {
-                cancel: { condition: "status == 'reserved' && owner == self",
-                          action: "status = 'canceled';"},
-                unCancel: { condition: "status == 'canceled' && owner == self",
-                            action: "status = 'available';" },
-                reserve: { condition: "status == 'available' && owner != self",
-                           action: "status = 'reserved'; reserver = self" },
-                unReserve: { condition: "status == 'reserved' && reserver == self",
-                             action: "status = 'available'; reserver = undefined;"}
+                cancel: { label: "Cancel this Session",
+                          condition: "item.status == 'reserved' && item.owner == app.user",
+                          action: "item.status = 'canceled';"},
+                unCancel: { label: "Make Available",
+                            condition: "item.status == 'canceled' && item.owner == app.user",
+                            action: "item.status = 'available';" },
+                reserve: { label: "Reserve this Session",
+                           condition: "item.status == 'available' && item.owner != app.user",
+                           action: "item.status = 'reserved'; item.reserver = self" },
+                unReserve: { label: "Cancel Reservation",
+                             condition: "item.status == 'reserved' && item.reserver == app.user",
+                             action: "item.status = 'available'; item.reserver = undefined;"}
             },
             views: {
                 read: { properties: [ 'session.short', 'time', 'status', 'reserver',
@@ -133,6 +139,7 @@ Size limit
                                   ] }
             },
             properties: {
+                title: {},
                 session: { type: 'sessions' },
                 time: { type: 'time',
                         compute: "session.time + session.indexOf(this) * 0.5/24",
