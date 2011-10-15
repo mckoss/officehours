@@ -63,6 +63,7 @@ function loadApp(appText) {
     var appDefinition = eval('(' + appText + ')');
     // Global app variable
     app = new Application(appDefinition);
+    app.user = client.username;
 }
 
 function loadData(appData) {
@@ -116,7 +117,7 @@ Application.methods({
         read: {
             back: { label: "Back", dataRel: 'back' },
             edit: { label: "Edit",
-                    condition: "app.currentUser() != undefined",
+                    condition: "app.user != undefined",
                     href: "#{key}-write" }
         },
 
@@ -150,10 +151,6 @@ Application.methods({
         $.mobile.activePage = undefined;
         $('body').html(app.html());
         $.mobile.initializePage();
-    },
-
-    currentUser: function () {
-        return client.username;
     },
 
     signIn: function () {

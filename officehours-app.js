@@ -50,14 +50,14 @@ Size limit
         home: { title: "Office Hours",
                 toolbar: {
                     signIn: { label: "Sign In",
-                              condition: "app.currentUser() == undefined",
+                              condition: "app.user == undefined",
                               onclick: "app.signIn()"},
                     signOut: { label: "Sign Out",
-                              condition: "app.currentUser() != undefined",
+                              condition: "app.user != undefined",
                               onclick: "app.signOut()"},
                     myProfile: { label: "My Profile",
-                                 condition: "app.currentUser() != undefined",
-                                 onclick: "app.gotoInstance('users', app.currentUser())"}
+                                 condition: "app.user != undefined",
+                                 onclick: "app.gotoInstance('users', app.user)"}
                 },
                 // TODO: Better name for this list of display items
                 properties: [{ view: 'list', schema: 'sessions' },
