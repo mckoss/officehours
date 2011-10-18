@@ -86,7 +86,7 @@ Size limit
                 description: { format: {preferedLength: 'long-text', defaultLine: 2}, },
                 date: { type: 'date' },
                 time: { label: "Start time", type: 'time' },
-                endTime: { computed: "app.addTime(item.time, 2)" },
+                endTime: { computed: "app.addTime(item.time, 2)", type: 'time' },
                 reservations: { type: 'reservations', card: 4, owned: true},
                 // Define supporting fields before their dependents.
                 hourRange: { label: "Time range", format: "{time} - {endTime}" }
