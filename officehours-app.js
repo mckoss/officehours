@@ -74,8 +74,8 @@ Size limit
             },
             views: {
                 read: { properties: [ 'description', 'owner', 'date',
-                                    'hour', 'reservation', { command: 'del' } ]},
-                write: {properties: [ 'title', 'description', 'date', 'hour' ]},
+                                    'hourRange', 'reservations', { command: 'del' } ]},
+                write: {properties: [ 'title', 'description', 'date', 'time', 'hourRange' ]},
                 list: { format: "{title}<br/>{owner} - {date}" }
             },
 
@@ -85,11 +85,12 @@ Size limit
                 owner: { type: "users", label: "Provider" },
                 description: { format: {preferedLength: 'long-text', defaultLine: 2}, },
                 date: { type: 'date' },
-                time: { type: 'time' },
+                time: { label: "Start time", type: 'time' },
+                endTime: { computed: "app.addTime(item.time, 2)" },
                 reservations: { type: 'reservations', card: 4, owned: true},
                 // Define supporting fields before their dependents.
-                hourRange: {type: 'formatted', format: "{time | time} - {time + 2/24 | time}" },
-                short: { type: 'formatted', format: "{title}\n{owner} - {date} {hourRange}" }
+                hourRange: { label: "Time range", format: "{time} - {endTime}" }
+                // short: { format: "{title}\n{owner} - {date} {hourRange}" }
             }
         },
 
@@ -130,10 +131,10 @@ Size limit
                                   ] }
             },
             properties: {
-                title: {},
+                title: { format: "{time} ({status})"},
                 session: { type: 'sessions' },
                 time: { type: 'time',
-                        compute: "session.time + session.indexOf(this) * 0.5/24",
+                        compute: "item.session.time + item.session.indexOf(item) * 0.5/24",
                         format: "{time | time} - {time + 0.5/24 | time}" },
                 status: { valid: ['available', 'reserved', 'canceled'] },
                 reserver: { type: 'users' }

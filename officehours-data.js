@@ -5,7 +5,7 @@
                     description: "This is a great session where you will learn lots of stuff about JQTouch.",
                     owner: "cwkoss",
                     date: new Date(2011, 10, 1),
-                    time: 11,
+                    time: '13:00',
                     reservations: ["cwkoss-123-0", "cwkoss-123-1", "cwkoss-123-2", "cwkoss-123-3"]
                 },
                 "bobby-124":    {
@@ -13,7 +13,7 @@
                     description: "Quoridor is a game that is most fun when you make your friends most frustrated.",
                     owner: "bobby",
                     date: new Date(2011, 2, 22),
-                    time: 15,
+                    time: '15:00',
                     reservations: ["bobby-124-0", "bobby-124-1", "bobby-124-2", "bobby-124-3"]
                 },
                 "mckoss-8977":  {
@@ -21,7 +21,7 @@
                     description: "Get the pigs!  They have taken our eggs! Learn about angles and when to tap the screen.",
                     owner: "mckoss",
                     date: new Date(2011, 5, 6),
-                    time: 14,
+                    time: '14:00',
                     reservations: ["mckoss-8977-0", "mckoss-8977-1", "mckoss-8977-2", "mckoss-8977-3"]
                 }
             },

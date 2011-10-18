@@ -7,6 +7,7 @@
   ],
   "appgen-all.js": [
       "namespace-plus.js",
+      "dateformat.js",
       { "path": "appgen.js", "namespace": "com.pageforest.appgen" }
     ]
   },
