@@ -45,17 +45,17 @@
                     email: "mike@mckoss.com"
                 }
             },
-            reservations: { "cwkoss-123-0": {reserver: undefined, status: "available", session:"cwkoss-123", owner: "cwkoss"},
-                            "cwkoss-123-1": {reserver: "mckoss", status: "reserved", session:"cwkoss-123", owner: "cwkoss"},
-                            "cwkoss-123-2": {reserver: "bobby", status: "reserved", session:"cwkoss-123", owner: "cwkoss"},
-                            "cwkoss-123-3": {reserver: undefined, status: "available", session:"cwkoss-123", owner: "cwkoss"},
-                            "bobby-124-0": {reserver: "cwkoss", status: "reserved", session:"bobby-124", owner: "bobby"},
-                            "bobby-124-1": {reserver: "mckoss", status: "reserved", session:"bobby-124", owner: "bobby"},
-                            "bobby-124-2": {reserver: undefined, status: "cancelled", session:"bobby-124", owner: "bobby"},
-                            "bobby-124-3": {reserver: undefined, status: "cancelled", session:"bobby-124", owner: "bobby"},
-                            "mckoss-8977-0": {reserver: undefined, status: "available", session:"mckoss-8977", owner: "mckoss"},
-                            "mckoss-8977-1": {reserver: undefined, status: "available", session:"mckoss-8977", owner: "mckoss"},
-                            "mckoss-8977-2": {reserver: "bobby", status: "reserved", session:"mckoss-8977", owner: "mckoss"},
-                            "mckoss-8977-3": {reserver: "cwkoss", status: "reserved", session:"mckoss-8977", owner: "mckoss"}
+            reservations: { "cwkoss-123-0": {index: 0, reserver: undefined, status: "available", session:"cwkoss-123", owner: "cwkoss"},
+                            "cwkoss-123-1": {index: 1, reserver: "mckoss", status: "reserved", session:"cwkoss-123", owner: "cwkoss"},
+                            "cwkoss-123-2": {index: 2, reserver: "bobby", status: "reserved", session:"cwkoss-123", owner: "cwkoss"},
+                            "cwkoss-123-3": {index: 3, reserver: undefined, status: "available", session:"cwkoss-123", owner: "cwkoss"},
+                            "bobby-124-0": {index: 0, reserver: "cwkoss", status: "reserved", session:"bobby-124", owner: "bobby"},
+                            "bobby-124-1": {index: 1, reserver: "mckoss", status: "reserved", session:"bobby-124", owner: "bobby"},
+                            "bobby-124-2": {index: 2, reserver: undefined, status: "cancelled", session:"bobby-124", owner: "bobby"},
+                            "bobby-124-3": {index: 3, reserver: undefined, status: "cancelled", session:"bobby-124", owner: "bobby"},
+                            "mckoss-8977-0": {index: 0, reserver: undefined, status: "available", session:"mckoss-8977", owner: "mckoss"},
+                            "mckoss-8977-1": {index: 1, reserver: undefined, status: "available", session:"mckoss-8977", owner: "mckoss"},
+                            "mckoss-8977-2": {index: 2, reserver: "bobby", status: "reserved", session:"mckoss-8977", owner: "mckoss"},
+                            "mckoss-8977-3": {index: 3, reserver: "cwkoss", status: "reserved", session:"mckoss-8977", owner: "mckoss"}
                           }
 }

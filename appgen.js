@@ -265,6 +265,28 @@ Application.methods({
             }
         }
 
+        // Convert external object references to direct javascript references
+        for (propertyName in properties) {
+            propertyDef = properties[propertyName];
+            var extSchemaName = propertyDef.type;
+            var extSchema = this.schemas[extSchemaName];
+            if (!extSchema) {
+                continue;
+            }
+            var value = instance[propertyName];
+            if (value == undefined) {
+                continue;
+            }
+            if (typeof(value) == 'string') {
+                instance[propertyName] = this.data[extSchemaName][value];
+                continue;
+            }
+            for (var i = 0; i < value.length; i++) {
+                var val = value[i];
+                value[i] = this.data[extSchemaName][value[i]];
+            }
+        }
+
         // Evaluate computed properties
         for (propertyName in properties) {
             propertyDef = properties[propertyName];

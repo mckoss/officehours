@@ -133,9 +133,9 @@ Size limit
             properties: {
                 title: { format: "{time} ({status})"},
                 session: { type: 'sessions' },
-                time: { type: 'time',
-                        compute: "item.session.time + item.session.indexOf(item) * 0.5/24",
-                        format: "{time | time} - {time + 0.5/24 | time}" },
+                index: { type: 'number' },
+                time: { computed: "app.addTime(item.session.time, 0, 30 * item.index)", type: 'time' },
+                endTime: { computed: "app.addTime(item.session.time, 0, 30 * (item.index + 1))", type: 'time' },
                 status: { valid: ['available', 'reserved', 'canceled'] },
                 reserver: { type: 'users' }
             }
