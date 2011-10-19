@@ -123,7 +123,7 @@ Size limit
                              action: "item.status = 'available'; item.reserver = undefined;"}
             },
             views: {
-                read: { properties: [ 'session.short', 'time', 'status', 'reserver',
+                read: { properties: [ 'session', 'time', 'status', 'reserver',
                                     { command: 'cancel' },
                                     { command: 'unCancel' },
                                     { command: 'reserve' },

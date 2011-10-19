@@ -213,7 +213,9 @@ Application.methods({
             var instance = instances[key];
             var content = this.renderInstance(rc, schemaName, view, instance);
             result += this.templates.viewPage.format({app: this,
-                                                      title: instance.title,
+                                                      title: this.renderExpression('{title}',
+                                                                                   instance,
+                                                                                   schemaName),
                                                       id: key,
                                                       view: 'read',
                                                       buttons: buttons,
@@ -454,6 +456,7 @@ Application.methods({
         st = st.toString();
         st = st.replace(reFormat, function(whole, key) {
             var currentSchemaName = schemaName;
+            var currentInstance = instance;
             var value = instance;
             var parts = key.split('|');
             key = string.strip(parts[0]);
@@ -463,19 +466,22 @@ Application.methods({
             for (var i = 0; i < keys.length; i++) {
                 key = keys[i];
                 propertyDef = self.schemas[currentSchemaName].properties[key];
+                if (propertyDef.format) {
+                    return self.renderExpression(propertyDef.format, instance, schemaName);
+                }
                 var n = parseInt(key);
                 if (!isNaN(n)) {
                     value = value[n];
                 } else {
-                    value = value[key];
+                    currentInstance = value;
                     currentSchemaName = propertyDef.type;
+                    value = value[key];
                 }
                 if (value == undefined) {
                     return "";
                 }
             }
-            // Implicit toString() on this.
-            return self.renderProperty(rc, value, propertyDef, instance, currentSchemaName);
+            return self.renderProperty(rc, value, propertyDef, currentInstance, currentSchemaName);
         });
         return st;
     },
