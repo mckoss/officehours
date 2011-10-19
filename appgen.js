@@ -105,10 +105,6 @@ Application.methods({
             '    <span>{value}</span>' +
             '</div></li>',
 
-        list: '<ul data-role="listview" data-inset="true">{content}</ul>',
-
-        listLine: '<li><a href="#{key}-read">{item}</a></li>',
-
         commandLine: '<input type="button" data-theme="b" ' +
                      'onclick="app.doCommand(\'{schema}\', \'{command}\');" ' +
                      'value="{label}"/>'
@@ -141,6 +137,7 @@ Application.methods({
 
     setData: function (data) {
         this.data = data;
+        this.prepareInstances();
         console.log("Data loaded", data);
     },
 
@@ -194,24 +191,27 @@ Application.methods({
 
     renderSchemas: function () {
         var result = "";
+        var rc = new RenderContext();
+
+        // Render all the instances of each schema
         for (var schemaName in this.schemas) {
-            result += this.renderInstances(schemaName);
+            result += this.renderInstances(rc, schemaName);
         }
+
         return result;
     },
 
-    renderInstances: function (schemaName) {
+    renderInstances: function (rc, schemaName) {
         var result = "";
         var schema = this.schemas[schemaName];
         // TODO: Render write view too
         var view = this.getView(schema, 'read');
-        var instances = this.data[schemaName];
         // TODO: Move inside loop if toolbar buttons could depend on instance state
         var buttons = this.renderToolbarButtons(this.defaultToolbars.read);
+        var instances = this.data[schemaName];
         for (var key in instances) {
             var instance = instances[key];
-            this.prepareInstance(schemaName, instance);
-            var content = this.renderInstance(schemaName, view, instance);
+            var content = this.renderInstance(rc, schemaName, view, instance);
             result += this.templates.viewPage.format({app: this,
                                                       title: instance.title,
                                                       id: key,
@@ -222,31 +222,49 @@ Application.methods({
         return result;
     },
 
-    renderInstance: function(schemaName, view, instance) {
+    renderInstance: function(rc, schemaName, view, instance) {
         if (view.format) {
-            return view.format.format(instance);
+            return this.renderExpression(view.format, instance, schemaName);
         }
-        return this.renderProperties(schemaName, instance, view.properties);
+        var result = this.renderProperties(rc, schemaName, instance, view.properties);
+        return result;
     },
 
-    renderList: function(schemaName, viewName, keys) {
-        var result = "";
+    renderList: function(rc, schemaName, viewName, instances) {
         var schema = this.schemas[schemaName];
-        var instances = this.data[schemaName];
+        if (!instances) {
+            // Object.values ...
+            instances = Object.keys(this.data[schemaName]).map(function (key) {
+                return this.data[schemaName][key];
+            });
+        }
         var view = this.getView(schema, viewName);
-        if (!keys) {
-            keys = Object.keys(instances);
+        var elements = [];
+        for (var i = 0; i < instances.length; i++) {
+            var instance = instances[i];
+            var item = this.renderInstance(rc, schemaName, view, instance);
+            elements.push({item: item,
+                           schema: schemaName,
+                           key: instance._key});
         }
-        for (var i = 0; i < keys.length; i++) {
-            var key = keys[i];
-            var item = this.renderInstance(schema, view, instances[key]);
-            result += this.templates.listLine.format({item: item, schema: schemaName, key: key});
-        }
-        return this.templates.list.format({content: result});
+
+        result = rc.renderList(elements);
+        return result;
     },
 
     getView: function(schema, viewName) {
         return schema.views[viewName] || this.defaultViews[viewName] || this.defaultViews['list'];
+    },
+
+    prepareInstances: function() {
+        // Ensure that all instances have a _key property.
+        for (var schemaName in this.schemas) {
+            var instances = this.data[schemaName];
+            for (var key in instances) {
+                instances[key]._key = key;
+                this.prepareInstance(schemaName, instances[key]);
+            }
+        }
     },
 
     prepareInstance: function(schemaName, instance) {
@@ -298,7 +316,7 @@ Application.methods({
     },
 
     // Render a subset of the properties of an instance.
-    renderProperties: function (schemaName, instance, properties) {
+    renderProperties: function (rc, schemaName, instance, properties) {
         var result = "";
         var label;
         var value;
@@ -314,11 +332,11 @@ Application.methods({
                     label = propertyDef.label;
                 }
 
-                value = this.renderProperty(instance[properties[i]], propertyDef,
+                value = this.renderProperty(rc, instance[properties[i]], propertyDef,
                                             instance, schemaName);
                 result += this.templates.propertyLine.format({label: label, value: value});
             } else if (label.view) {
-                result += this.renderList(label.schema, label.view);
+                result += this.renderList(rc, label.schema, label.view);
             } else if (label.command) {
                 result += this.renderCommand(label.schema || schemaName, label.command, instance);
             } else {
@@ -328,7 +346,7 @@ Application.methods({
         return result;
     },
 
-    renderProperty: function(value, propertyDef, instance, schemaName) {
+    renderProperty: function(rc, value, propertyDef, instance, schemaName) {
         var schema = this.schemas[propertyDef.type];
         if (!schema) {
             // Formatted (string) property
@@ -356,17 +374,23 @@ Application.methods({
             return value.toString();
         }
 
-        if (typeof value == 'string') {
+        if (value == undefined) {
+            return "";
+        }
+
+        if (!types.isType(value, 'array')) {
             value = [value];
         }
 
-        return this.renderList(propertyDef.type, 'list', value);
+        var result = this.renderList(rc, propertyDef.type, 'list', value);
+        return result;
     },
 
     renderPage: function (pageId) {
         var page = this.pages[pageId];
         var buttons = this.renderToolbarButtons(page.toolbar);
-        var content = this.renderProperties(undefined, undefined, page.properties);
+        var rc = new RenderContext();
+        var content = this.renderProperties(rc, undefined, undefined, page.properties);
         return this.templates.page.format(types.extend({pageId: pageId,
                                                         app: this,
                                                         buttons: buttons,
@@ -426,30 +450,32 @@ Application.methods({
         if (st == undefined) {
             return "undefined";
         }
+        var rc = new RenderContext('expression');
         st = st.toString();
         st = st.replace(reFormat, function(whole, key) {
+            var currentSchemaName = schemaName;
             var value = instance;
             var parts = key.split('|');
-            key = strip(parts[0]);
-            var fmt = strip(parts[1]);
+            key = string.strip(parts[0]);
+            var fmt = string.strip(parts[1]);
             var keys = key.split('.');
             var propertyDef;
             for (var i = 0; i < keys.length; i++) {
                 key = keys[i];
-                propertyDef = self.schemas[schemaName].properties[key];
+                propertyDef = self.schemas[currentSchemaName].properties[key];
                 var n = parseInt(key);
                 if (!isNaN(n)) {
                     value = value[n];
                 } else {
-                    // TODO: Lookup referenced item and update schemaName and propertyDef
                     value = value[key];
+                    currentSchemaName = propertyDef.type;
                 }
                 if (value == undefined) {
                     return "";
                 }
             }
             // Implicit toString() on this.
-            return self.renderProperty(value, propertyDef, instance, schemaName);
+            return self.renderProperty(rc, value, propertyDef, instance, currentSchemaName);
         });
         return st;
     },
@@ -575,8 +601,25 @@ Enum.methods({
     }
 });
 
-
-function strip(s) {
-    return (s || "").replace(/^\s+|\s+$/g, "");
+function RenderContext(mode) {
+    // mode one of 'read', 'write', 'expression'
+    this.mode = mode || 'read';
 }
 
+RenderContext.methods({
+    list: '<ul data-role="listview" data-inset="true">{content}</ul>',
+    listLine: '<li><a href="#{key}-read">{item}</a></li>',
+
+    renderList: function(a) {
+        if (this.mode == 'expression') {
+            a = a.map(function(obj) { return obj.item; });
+            return a.join(', ');
+        }
+
+        var self = this;
+        a = a.map(function(obj) {
+            return self.listLine.format(obj);
+        });
+        return this.list.format({content: a.join('')});
+    }
+});
