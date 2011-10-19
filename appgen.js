@@ -88,7 +88,7 @@ Application.methods({
             '</div>',
 
         viewPage:
-            '<div id="{id}-{view}" data-role="page">' +
+            '<div id="{key}" data-role="page">' +
             '  <div data-role="header"><h1>{title}</h1>{buttons}</div>' +
             '    <div data-role="content">' +
             '      <ul data-role="listview">' +
@@ -115,13 +115,13 @@ Application.methods({
             back: { label: "Back", dataRel: 'back' },
             edit: { label: "Edit",
                     condition: "app.user != undefined",
-                    href: "#{key}-write" }
+                    href: "#{key}-edit" }
         },
 
-        write: {
+        edit: {
             back: { label: "Back", dataRel: 'back' },
             save: { label: "Save",
-                    href: "#{key}-read",
+                    href: "#{key}",
                     onclick: "app.saveInstance('{schema}', '{key}')" }
         }
     },
@@ -163,12 +163,20 @@ Application.methods({
         client.signOut();
     },
 
-    gotoInstance: function(schemaName, id, mode) {
+    getPageKey: function (schemaName, id, mode) {
+        var key = schemaName + '-' + id;
         if (mode == undefined) {
             mode = 'read';
         }
+        if (mode != 'read') {
+            key += '-' + mode;
+        }
+        return key;
+    },
+
+    gotoInstance: function (schemaName, id, mode) {
         // TODO: prefix with schemaName for uniqueness
-        $.mobile.changePage($('#' + id + '-' + mode));
+        $.mobile.changePage($('#' + this.getPageKey(schemaName, id, mode)));
     },
 
     doCommand: function(schemaName, commandName) {
@@ -204,19 +212,19 @@ Application.methods({
     renderInstances: function (rc, schemaName) {
         var result = "";
         var schema = this.schemas[schemaName];
-        // TODO: Render write view too
+        // TODO: Render edit view too
         var view = this.getView(schema, 'read');
         // TODO: Move inside loop if toolbar buttons could depend on instance state
         var buttons = this.renderToolbarButtons(this.defaultToolbars.read);
         var instances = this.data[schemaName];
-        for (var key in instances) {
-            var instance = instances[key];
+        for (var id in instances) {
+            var instance = instances[id];
             var content = this.renderInstance(rc, schemaName, view, instance);
             result += this.templates.viewPage.format({app: this,
                                                       title: this.renderExpression('{title}',
                                                                                    instance,
                                                                                    schemaName),
-                                                      id: key,
+                                                      key: this.getPageKey(schemaName, id),
                                                       view: 'read',
                                                       buttons: buttons,
                                                       content: content});
@@ -247,7 +255,7 @@ Application.methods({
             var item = this.renderInstance(rc, schemaName, view, instance);
             elements.push({item: item,
                            schema: schemaName,
-                           key: instance._key});
+                           key: this.getPageKey(schemaName, instance._key)});
         }
 
         result = rc.renderList(elements);
@@ -608,13 +616,13 @@ Enum.methods({
 });
 
 function RenderContext(mode) {
-    // mode one of 'read', 'write', 'expression'
+    // mode one of 'read', 'edit', 'expression'
     this.mode = mode || 'read';
 }
 
 RenderContext.methods({
     list: '<ul data-role="listview" data-inset="true">{content}</ul>',
-    listLine: '<li><a href="#{key}-read">{item}</a></li>',
+    listLine: '<li><a href="#{key}">{item}</a></li>',
 
     renderList: function(a) {
         if (this.mode == 'expression') {

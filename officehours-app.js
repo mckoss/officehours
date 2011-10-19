@@ -75,7 +75,7 @@ Size limit
             views: {
                 read: { properties: [ 'description', 'owner', 'date',
                                     'hourRange', 'reservations', { command: 'del' } ]},
-                write: {properties: [ 'title', 'description', 'date', 'time', 'hourRange' ]},
+                edit: {properties: [ 'title', 'description', 'date', 'time', 'hourRange' ]},
                 list: { format: "{title}<br/>{owner} - {date}" }
             },
 
@@ -97,7 +97,7 @@ Size limit
         users: {
             views: {
                 read: { properties: [ 'owner', 'email', 'phone' ] },
-                write: { properties: [ 'title', 'email', 'phone' ] }
+                edit: { properties: [ 'title', 'email', 'phone' ] }
             },
             properties: {
                 owner: { type: "users", label: 'Username' },
