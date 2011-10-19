@@ -115,13 +115,13 @@ Application.methods({
             back: { label: "Back", dataRel: 'back' },
             edit: { label: "Edit",
                     condition: "app.user != undefined",
-                    href: "#{key}-edit" }
+                    href: "#{schema}-{id}-edit" }
         },
 
         edit: {
             back: { label: "Back", dataRel: 'back' },
             save: { label: "Save",
-                    href: "#{key}",
+                    href: "#{schema}-{id}}",
                     onclick: "app.saveInstance('{schema}', '{key}')" }
         }
     },
@@ -214,17 +214,17 @@ Application.methods({
         var schema = this.schemas[schemaName];
         // TODO: Render edit view too
         var view = this.getView(schema, 'read');
-        // TODO: Move inside loop if toolbar buttons could depend on instance state
-        var buttons = this.renderToolbarButtons(this.defaultToolbars.read);
         var instances = this.data[schemaName];
         for (var id in instances) {
             var instance = instances[id];
             var content = this.renderInstance(rc, schemaName, view, instance);
+            var buttons = this.renderToolbarButtons(this.defaultToolbars.read, schemaName, id);
+            var key = this.getPageKey(schemaName, id);
             result += this.templates.viewPage.format({app: this,
                                                       title: this.renderExpression('{title}',
                                                                                    instance,
                                                                                    schemaName),
-                                                      key: this.getPageKey(schemaName, id),
+                                                      key: key,
                                                       view: 'read',
                                                       buttons: buttons,
                                                       content: content});
@@ -407,17 +407,21 @@ Application.methods({
                                                         content: content}, page));
     },
 
-    renderToolbarButtons: function (toolbar) {
+    renderToolbarButtons: function (toolbar, schemaName, id) {
         if (!toolbar) {
             return "";
         }
         var result = "";
         for (var cmd in toolbar) {
+            var href = '';
             var command = toolbar[cmd];
             var visible = this.evalCondition(command.condition);
+            if (command.href) {
+                href = command.href.format({schema: schemaName, id: id});
+            }
             if (visible) {
-                result += this.templates.toolbarButton.format(types.extend({href: '#'},
-                                                                           command));
+                result += this.templates.toolbarButton.format(types.extend({}, command,
+                                                                           {href: '#' + href}));
             }
         }
         return result;
