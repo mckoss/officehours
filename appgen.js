@@ -102,7 +102,7 @@ Application.methods({
         propertyLine:
             '<li><div data-role="fieldcontain">' +
             '    <label class="ui-input-text" for="{label}">{label}:</label>' +
-            '    <span>{value}</span>' +
+            '    {value}' +
             '</div></li>',
 
         commandLine: '<input type="button" data-theme="b" ' +
@@ -202,6 +202,9 @@ Application.methods({
 
         // Render all the instances of each schema
         for (var schemaName in this.schemas) {
+            rc.mode = 'read';
+            result += this.renderInstances(rc, schemaName);
+            rc.mode = 'edit';
             result += this.renderInstances(rc, schemaName);
         }
 
@@ -212,35 +215,24 @@ Application.methods({
         var result = "";
         var schema = this.schemas[schemaName];
         // TODO: Render edit view too
-        var view = this.getView(schema, 'read');
+        var view = this.getView(schema, rc.mode);
         var instances = this.data[schemaName];
         for (var id in instances) {
             var instance = instances[id];
+            if (rc.mode == 'edit' && instance.owner && instance.owner._key != app.user) {
+                continue;
+            }
             var content = this.renderInstance(rc, schemaName, view, instance);
-            var buttons = this.renderToolbarButtons(this.defaultToolbars.read, schemaName, id);
-            var key = this.getPageKey(schemaName, id);
+            var buttons = this.renderToolbarButtons(this.defaultToolbars[rc.mode], schemaName, id);
+            var key = this.getPageKey(schemaName, id, rc.mode);
             result += this.templates.viewPage.format({app: this,
                                                       title: this.renderExpression('{title}',
                                                                                    instance,
                                                                                    schemaName),
                                                       key: key,
-                                                      view: 'read',
+                                                      view: rc.mode,
                                                       buttons: buttons,
                                                       content: content});
-
-            // Generate edit page for qualifying instances
-            if (instance.owner && app.user == instance.owner._key) {
-                buttons = this.renderToolbarButtons(this.defaultToolbars.edit, schemaName, id);
-                key = this.getPageKey(schemaName, id, 'edit');
-                result += this.templates.viewPage.format({app: this,
-                                                          title: this.renderExpression('{title}',
-                                                                                       instance,
-                                                                                       schemaName),
-                                                          key: key,
-                                                          view: 'edit',
-                                                          buttons: buttons,
-                                                          content: content});
-            }
         }
         return result;
     },
@@ -356,7 +348,7 @@ Application.methods({
                 }
 
                 value = this.renderProperty(rc, instance[properties[i]], propertyDef,
-                                            instance, schemaName);
+                                            instance, schemaName, properties[i]);
                 result += this.templates.propertyLine.format({label: label, value: value});
             } else if (label.view) {
                 result += this.renderList(rc, label.schema, label.view);
@@ -369,34 +361,40 @@ Application.methods({
         return result;
     },
 
-    renderProperty: function(rc, value, propertyDef, instance, schemaName) {
+    renderProperty: function(rc, value, propertyDef, instance, schemaName, propName) {
         var schema = this.schemas[propertyDef.type];
+        var result;
         if (!schema) {
             // Formatted (string) property
             if (propertyDef.format && typeof(propertyDef.format) == 'string') {
-                return this.renderExpression(propertyDef.format, instance, schemaName);
-            }
-
-            // TODO: Move to type-specific field class for Dates
-            if (types.isType(value, 'date')) {
-                switch (propertyDef.type) {
-                case 'date':
-                    return value.format('ddd, mmm, d, yyyy', true);
-                case 'time':
-                    return value.format('h:MM tt', true);
-                case 'datetime':
-                    return value.format('ddd, mmm, d, yyyy h:MM tt', true);
+                result = this.renderExpression(propertyDef.format, instance, schemaName);
+            } else {
+                // TODO: Move to type-specific field class for Dates
+                if (types.isType(value, 'date')) {
+                    switch (propertyDef.type) {
+                    case 'date':
+                        result = value.format('ddd, mmm, d, yyyy', true);
+                        break;
+                    case 'time':
+                        result = value.format('h:MM tt', true);
+                        break;
+                    case 'datetime':
+                        result = value.format('ddd, mmm, d, yyyy h:MM tt', true);
+                        break;
+                    }
                 }
             }
 
             if (value == undefined) {
-                return '';
+                result = '';
+            } else {
+                // TODO: Type-specific rendering
+                result = value.toString();
             }
-
-            // TODO: Type-specific rendering
-            return value.toString();
+            return rc.renderField(result, schemaName, instance, propName);
         }
 
+        // TODO: Render picker's for external item properties.
         if (value == undefined) {
             return "";
         }
@@ -405,7 +403,7 @@ Application.methods({
             value = [value];
         }
 
-        var result = this.renderList(rc, propertyDef.type, 'list', value);
+        result = this.renderList(rc, propertyDef.type, 'list', value);
         return result;
     },
 
@@ -513,7 +511,8 @@ Application.methods({
                     return "";
                 }
             }
-            return self.renderProperty(rc, value, propertyDef, currentInstance, currentSchemaName);
+            return self.renderProperty(rc, value, propertyDef,
+                                       currentInstance, currentSchemaName, key);
         });
         return st;
     },
@@ -645,8 +644,15 @@ function RenderContext(mode) {
 }
 
 RenderContext.methods({
-    list: '<ul data-role="listview" data-inset="true">{content}</ul>',
-    listLine: '<li><a href="#{key}">{item}</a></li>',
+    templates: {
+        list: '<ul data-role="listview" data-inset="true">{content}</ul>',
+        listLine: '<li><a href="#{key}">{item}</a></li>',
+
+        fields: {
+            read: '<span>{content}</span>',
+            edit: '<input id="{schema}-{id}-{propName}" value="{content}"/>'
+        }
+    },
 
     renderList: function(a) {
         if (this.mode == 'expression') {
@@ -656,8 +662,16 @@ RenderContext.methods({
 
         var self = this;
         a = a.map(function(obj) {
-            return self.listLine.format(obj);
+            return self.templates.listLine.format(obj);
         });
-        return this.list.format({content: a.join('')});
+        return this.templates.list.format({content: a.join('')});
+    },
+
+    renderField: function(content, schemaName, instance, propName) {
+        var template = this.templates.fields[this.mode] || this.templates.fields['read'];
+        return template.format({schema: schemaName,
+                                id: instance._key,
+                                propName: propName,
+                                content: content});
     }
 });
