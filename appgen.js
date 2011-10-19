@@ -115,13 +115,13 @@ Application.methods({
             back: { label: "Back", dataRel: 'back' },
             edit: { label: "Edit",
                     condition: "app.user == item.owner._key",
-                    href: "#{schema}-{id}-edit" }
+                    anchor: "{schema}-{id}-edit" }
         },
 
         edit: {
             back: { label: "Back", dataRel: 'back' },
             save: { label: "Save",
-                    href: "#{schema}-{id}}",
+                    anchor: "{schema}-{id}}",
                     onclick: "app.saveInstance('{schema}', '{key}')" }
         }
     },
@@ -227,6 +227,20 @@ Application.methods({
                                                       view: 'read',
                                                       buttons: buttons,
                                                       content: content});
+
+            // Generate edit page for qualifying instances
+            if (instance.owner && app.user == instance.owner._key) {
+                buttons = this.renderToolbarButtons(this.defaultToolbars.edit, schemaName, id);
+                key = this.getPageKey(schemaName, id, 'edit');
+                result += this.templates.viewPage.format({app: this,
+                                                          title: this.renderExpression('{title}',
+                                                                                       instance,
+                                                                                       schemaName),
+                                                          key: key,
+                                                          view: 'edit',
+                                                          buttons: buttons,
+                                                          content: content});
+            }
         }
         return result;
     },
@@ -412,15 +426,15 @@ Application.methods({
         }
         var result = "";
         for (var cmd in toolbar) {
-            var href = '';
+            var anchor = '';
             var command = toolbar[cmd];
             var visible = this.evalCondition(command.condition, this.getInstance(schemaName, id));
-            if (command.href) {
-                href = command.href.format({schema: schemaName, id: id});
+            if (command.anchor) {
+                anchor = command.anchor.format({schema: schemaName, id: id});
             }
             if (visible) {
-                result += this.templates.toolbarButton.format(types.extend({}, command,
-                                                                           {href: '#' + href}));
+                result += this.templates.toolbarButton.format(types.extend({href: '#' + anchor},
+                                                                           command));
             }
         }
         return result;
