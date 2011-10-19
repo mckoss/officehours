@@ -114,7 +114,7 @@ Application.methods({
         read: {
             back: { label: "Back", dataRel: 'back' },
             edit: { label: "Edit",
-                    condition: "app.user != undefined",
+                    condition: "app.user == item.owner._key",
                     href: "#{schema}-{id}-edit" }
         },
 
@@ -175,7 +175,6 @@ Application.methods({
     },
 
     gotoInstance: function (schemaName, id, mode) {
-        // TODO: prefix with schemaName for uniqueness
         $.mobile.changePage($('#' + this.getPageKey(schemaName, id, mode)));
     },
 
@@ -306,12 +305,12 @@ Application.methods({
                 continue;
             }
             if (typeof(value) == 'string') {
-                instance[propertyName] = this.data[extSchemaName][value];
+                instance[propertyName] = this.getInstance(extSchemaName, value);
                 continue;
             }
             for (var i = 0; i < value.length; i++) {
                 var val = value[i];
-                value[i] = this.data[extSchemaName][value[i]];
+                value[i] = this.getInstance(extSchemaName, value[i]);
             }
         }
 
@@ -415,7 +414,7 @@ Application.methods({
         for (var cmd in toolbar) {
             var href = '';
             var command = toolbar[cmd];
-            var visible = this.evalCondition(command.condition);
+            var visible = this.evalCondition(command.condition, this.getInstance(schemaName, id));
             if (command.href) {
                 href = command.href.format({schema: schemaName, id: id});
             }
@@ -425,6 +424,13 @@ Application.methods({
             }
         }
         return result;
+    },
+
+    getInstance: function (schemaName, id) {
+        if (schemaName == undefined || id == undefined) {
+            return undefined;
+        }
+        return this.data[schemaName][id];
     },
 
     renderCommand: function(schemaName, commandName, instance) {
