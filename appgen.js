@@ -114,7 +114,7 @@ Application.methods({
         read: {
             back: { label: "Back", dataRel: 'back' },
             edit: { label: "Edit",
-                    condition: "app.user == item.owner._key",
+                    condition: "app.hasView(item, 'edit')",
                     anchor: "{schema}-{id}-edit" }
         },
 
@@ -216,11 +216,13 @@ Application.methods({
     renderInstances: function (rc, schemaName) {
         var result = "";
         var schema = this.schemas[schemaName];
-        // TODO: Render edit view too
-        var view = this.getView(schema, rc.mode);
         var instances = this.data[schemaName];
         for (var id in instances) {
             var instance = instances[id];
+            var view = this.getView(schema, rc.mode, instance);
+            if (!view) {
+                continue;
+            }
             if (rc.mode == 'edit' && instance.owner && instance.owner._key != app.user) {
                 continue;
             }
@@ -256,10 +258,13 @@ Application.methods({
                 return this.data[schemaName][key];
             });
         }
-        var view = this.getView(schema, viewName);
         var elements = [];
         for (var i = 0; i < instances.length; i++) {
             var instance = instances[i];
+            var view = this.getView(schema, viewName, instance);
+            if (!view) {
+                continue;
+            }
             var item = this.renderInstance(rc, schemaName, view, instance);
             elements.push({item: item,
                            schema: schemaName,
@@ -270,8 +275,18 @@ Application.methods({
         return result;
     },
 
-    getView: function(schema, viewName) {
-        return schema.views[viewName] || this.defaultViews[viewName] || this.defaultViews['list'];
+    getView: function(schema, viewName, instance) {
+        var view = schema.views[viewName] || this.defaultViews[viewName] ||
+            this.defaultViews['list'];
+        if (view.condition && !this.evalCondition(view.condition, instance)) {
+            return undefined;
+        }
+        return view;
+    },
+
+    hasView: function (instance, viewName) {
+        var view = this.getView(instance._schema, viewName, instance);
+        return view != undefined;
     },
 
     prepareInstances: function() {
@@ -289,6 +304,8 @@ Application.methods({
         var schema = schemaName && this.schemas[schemaName];
         var properties = schema.properties;
         var propertyDef, propertyName;
+
+        instance._schema = schema;
 
         // Parse strings into correct property types
         for (propertyName in properties) {

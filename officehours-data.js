@@ -54,7 +54,7 @@
                             "bobby-124-2": {index: 2, reserver: undefined, status: "cancelled", session:"bobby-124", owner: "bobby"},
                             "bobby-124-3": {index: 3, reserver: undefined, status: "cancelled", session:"bobby-124", owner: "bobby"},
                             "mckoss-8977-0": {index: 0, reserver: undefined, status: "available", session:"mckoss-8977", owner: "mckoss"},
-                            "mckoss-8977-1": {index: 1, reserver: undefined, status: "available", session:"mckoss-8977", owner: "mckoss"},
+                            "mckoss-8977-1": {index: 1, reserver: undefined, status: "cancelled", session:"mckoss-8977", owner: "mckoss"},
                             "mckoss-8977-2": {index: 2, reserver: "bobby", status: "reserved", session:"mckoss-8977", owner: "mckoss"},
                             "mckoss-8977-3": {index: 3, reserver: "cwkoss", status: "reserved", session:"mckoss-8977", owner: "mckoss"}
                           }

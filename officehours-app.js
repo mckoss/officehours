@@ -111,16 +111,16 @@ Size limit
         reservations: {
             commands: {
                 cancel: { label: "Cancel this Session",
-                          condition: "item.status == 'reserved' && item.owner == app.user",
+                          condition: "item.status == 'reserved' && item.owner._key == app.user",
                           action: "item.status = 'canceled';"},
                 unCancel: { label: "Make Available",
-                            condition: "item.status == 'canceled' && item.owner == app.user",
+                            condition: "item.status == 'cancelled' && item.owner._key == app.user",
                             action: "item.status = 'available';" },
                 reserve: { label: "Reserve this Session",
-                           condition: "item.status == 'available' && item.owner != app.user",
+                           condition: "item.status == 'available' && item.owner._key != app.user",
                            action: "item.status = 'reserved'; item.reserver = self" },
                 unReserve: { label: "Cancel Reservation",
-                             condition: "item.status == 'reserved' && item.reserver == app.user",
+                             condition: "item.status == 'reserved' && item.reserver._key == app.user",
                              action: "item.status = 'available'; item.reserver = undefined;"}
             },
             views: {
@@ -129,10 +129,12 @@ Size limit
                                     { command: 'unCancel' },
                                     { command: 'reserve' },
                                     { command: 'unReserve' }
-                                  ] }
+                                    ] },
+                edit: { condition: "false" }
             },
             properties: {
                 title: { format: "{time} ({status})"},
+                owner: { type: "users" },
                 session: { type: 'sessions' },
                 index: { type: 'number' },
                 time: { computed: "app.addTime(item.session.time, 0, 30 * item.index)", type: 'time' },
