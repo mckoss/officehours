@@ -121,8 +121,7 @@ Application.methods({
         edit: {
             back: { label: "Back", dataRel: 'back' },
             save: { label: "Save",
-                    anchor: "{schema}-{id}}",
-                    onclick: "app.saveInstance('{schema}', '{key}')" }
+                    onclick: 'app.saveInstance(\'{schema}\', \'{id}\')' }
         }
     },
 
@@ -139,7 +138,7 @@ Application.methods({
 
     setData: function (data) {
         this.data = data;
-        this.prepareInstances();
+        this.prepareData();
         console.log("Data loaded", data);
     },
 
@@ -151,9 +150,12 @@ Application.methods({
         // TODO: Return projection of application definition properties
     },
 
-    updatePages: function () {
+    updatePages: function (target) {
         $.mobile.activePage = undefined;
         $('body').html(app.html());
+        if (target) {
+            window.location.hash = this.getPageKey(target._schema._name, target._key);
+        }
         $.mobile.initializePage();
     },
 
@@ -245,8 +247,7 @@ Application.methods({
         if (view.format) {
             return this.renderExpression(view.format, instance, schemaName);
         }
-        var properties = view.properties || Object.keys(this.schemas[schemaName].properties);
-        var result = this.renderProperties(rc, schemaName, instance, properties);
+        var result = this.renderProperties(rc, schemaName, instance, view.properties);
         return result;
     },
 
@@ -281,6 +282,10 @@ Application.methods({
         if (view.condition && !this.evalCondition(view.condition, instance)) {
             return undefined;
         }
+        // Return extended view with all the properties of the schema appended
+        if (!view.properties) {
+            return types.extend({}, view, Object.keys(schema.properties));
+        }
         return view;
     },
 
@@ -289,9 +294,28 @@ Application.methods({
         return view != undefined;
     },
 
-    prepareInstances: function() {
+    saveInstance: function (schemaName, id) {
+        var schema = this.schemas[schemaName];
+        var instance = this.getInstance(schemaName, id);
+        var view = this.getView(schema, 'edit', instance);
+        var properties = view.properties;
+        for (var i = 0; i < properties.length; i++) {
+            var propname = properties[i];
+            if (typeof(propname) != 'string') {
+                continue;
+            }
+
+            var fieldName = schema._name + '-' + instance._key + '-' + propname;
+            var value = $('#' + fieldName).val();
+            instance[propname] = value;
+        }
+        this.updatePages(instance);
+    },
+
+    prepareData: function() {
         // Ensure that all instances have a _key property.
         for (var schemaName in this.schemas) {
+            this.schemas[schemaName]._name = schemaName;
             var instances = this.data[schemaName];
             for (var key in instances) {
                 instances[key]._key = key;
@@ -447,13 +471,18 @@ Application.methods({
         for (var cmd in toolbar) {
             var anchor = '';
             var command = toolbar[cmd];
+            var onclick;
             var visible = this.evalCondition(command.condition, this.getInstance(schemaName, id));
             if (command.anchor) {
                 anchor = command.anchor.format({schema: schemaName, id: id});
             }
+            if (command.onclick) {
+                onclick = command.onclick.format({schema: schemaName, id: id});
+            }
             if (visible) {
                 result += this.templates.toolbarButton.format(types.extend({href: '#' + anchor},
-                                                                           command));
+                                                                           command,
+                                                                           {onclick: onclick}));
             }
         }
         return result;

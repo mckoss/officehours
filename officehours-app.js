@@ -75,7 +75,7 @@ Size limit
             views: {
                 read: { properties: [ 'description', 'owner', 'date',
                                     'hourRange', 'reservations', { command: 'del' } ]},
-                edit: {properties: [ 'title', 'description', 'date', 'time', 'hourRange' ]},
+                edit: {properties: [ 'title', 'description', 'date', 'time' ]},
                 list: { format: "{title}<br/>{owner} - {date}" }
             },
 
