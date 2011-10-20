@@ -127,6 +127,8 @@ Application.methods({
     },
 
     defaultViews: {
+        read: {},
+        edit: {},
         list: { format: "{title}" }
     },
 
@@ -241,7 +243,8 @@ Application.methods({
         if (view.format) {
             return this.renderExpression(view.format, instance, schemaName);
         }
-        var result = this.renderProperties(rc, schemaName, instance, view.properties);
+        var properties = view.properties || Object.keys(this.schemas[schemaName].properties);
+        var result = this.renderProperties(rc, schemaName, instance, properties);
         return result;
     },
 

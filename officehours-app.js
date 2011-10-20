@@ -96,11 +96,12 @@ Size limit
 
         users: {
             views: {
-                read: { properties: [ 'owner', 'email', 'phone' ] },
+                read: { properties: [ 'username', 'email', 'phone' ] },
                 edit: { properties: [ 'title', 'email', 'phone' ] }
             },
             properties: {
-                owner: { type: "users", label: 'Username' },
+                owner: { type: "users" },
+                username: { computed: "item.owner._key" },
                 title: { label: 'Full Name' },
                 email: { label: 'E-Mail' },
                 phone: { label: 'Phone Number' }
