@@ -101,7 +101,7 @@ Application.methods({
 
         propertyLine:
             '<li><div data-role="fieldcontain">' +
-            '    <label class="ui-input-text" for="{label}">{label}:</label>' +
+            '    <label class="ui-input-text" for="{schema}-{id}-{propName}">{label}:</label>' +
             '    {value}' +
             '</div></li>',
 
@@ -198,7 +198,7 @@ Application.methods({
 
     renderSchemas: function () {
         var result = "";
-        var rc = new RenderContext();
+        var rc = new RenderContext(this);
 
         // Render all the instances of each schema
         for (var schemaName in this.schemas) {
@@ -349,7 +349,11 @@ Application.methods({
 
                 value = this.renderProperty(rc, instance[properties[i]], propertyDef,
                                             instance, schemaName, properties[i]);
-                result += this.templates.propertyLine.format({label: label, value: value});
+                result += this.templates.propertyLine.format({label: label,
+                                                              value: value,
+                                                              schema: schemaName,
+                                                              id: instance._key,
+                                                              propName: properties[i]});
             } else if (label.view) {
                 result += this.renderList(rc, label.schema, label.view);
             } else if (label.command) {
@@ -368,9 +372,7 @@ Application.methods({
             // Formatted (string) property
             if (propertyDef.format && typeof(propertyDef.format) == 'string') {
                 result = this.renderExpression(propertyDef.format, instance, schemaName);
-            } else {
-                // TODO: Move to type-specific field class for Dates
-                if (types.isType(value, 'date')) {
+            } else if (types.isType(value, 'date')) {
                     switch (propertyDef.type) {
                     case 'date':
                         result = value.format('ddd, mmm, d, yyyy', true);
@@ -382,19 +384,18 @@ Application.methods({
                         result = value.format('ddd, mmm, d, yyyy h:MM tt', true);
                         break;
                     }
-                }
-            }
-
-            if (value == undefined) {
+            } else if (value == undefined) {
                 result = '';
             } else {
                 // TODO: Type-specific rendering
                 result = value.toString();
             }
+
             return rc.renderField(result, schemaName, instance, propName);
         }
 
         // TODO: Render picker's for external item properties.
+
         if (value == undefined) {
             return "";
         }
@@ -410,7 +411,7 @@ Application.methods({
     renderPage: function (pageId) {
         var page = this.pages[pageId];
         var buttons = this.renderToolbarButtons(page.toolbar);
-        var rc = new RenderContext();
+        var rc = new RenderContext(this);
         var content = this.renderProperties(rc, undefined, undefined, page.properties);
         return this.templates.page.format(types.extend({pageId: pageId,
                                                         app: this,
@@ -482,7 +483,7 @@ Application.methods({
         if (st == undefined) {
             return "undefined";
         }
-        var rc = new RenderContext('expression');
+        var rc = new RenderContext(this, 'expression');
         st = st.toString();
         st = st.replace(reFormat, function(whole, key) {
             var currentSchemaName = schemaName;
@@ -638,7 +639,8 @@ Enum.methods({
     }
 });
 
-function RenderContext(mode) {
+function RenderContext(app, mode) {
+    this.app = app;
     // mode one of 'read', 'edit', 'expression'
     this.mode = mode || 'read';
 }
@@ -649,8 +651,14 @@ RenderContext.methods({
         listLine: '<li><a href="#{key}">{item}</a></li>',
 
         fields: {
-            read: '<span>{content}</span>',
-            edit: '<input id="{schema}-{id}-{propName}" value="{content}"/>'
+            text: {
+                read: '<span>{content}</span>',
+                edit: '<input type="text" id="{schema}-{id}-{propName}" value="{content}"/>'
+            },
+            number: {
+                read: '<span>{content}</span>',
+                edit: '<input type="number" id="{schema}-{id}-{propName}" value="{content}"/>'
+            }
         }
     },
 
@@ -668,7 +676,13 @@ RenderContext.methods({
     },
 
     renderField: function(content, schemaName, instance, propName) {
-        var template = this.templates.fields[this.mode] || this.templates.fields['read'];
+        var schema = this.app.schemas[schemaName];
+        var type = 'text';
+        if (schema && schema.type) {
+            type = schema.type;
+        }
+        var template = this.templates.fields[type][this.mode] ||
+            this.templates.fields[type]['read'];
         return template.format({schema: schemaName,
                                 id: instance._key,
                                 propName: propName,
