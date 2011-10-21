@@ -101,8 +101,8 @@ Application.methods({
 
         propertyLine:
             '<li><div data-role="fieldcontain">' +
-            '    <label class="ui-input-text" for="{schema}-{id}-{propName}">{label}:</label>' +
-            '    {value}' +
+            '    <label class="ui-input-text" for="{id}">{label}:</label>' +
+            '    {control}' +
             '</div></li>',
 
         commandLine: '<input type="button" data-theme="b" ' +
@@ -133,6 +133,7 @@ Application.methods({
 
     setApp: function (appDefinition) {
         types.extend(this, appDefinition);
+        this.prepareApp();
         console.log("App loaded", this);
     },
 
@@ -312,10 +313,20 @@ Application.methods({
         this.updatePages(instance);
     },
 
+    prepareApp: function () {
+        for (var schemaName in this.schemas) {
+            var schema = this.schemas[schemaName];
+            schema._name = schemaName;
+            for (var propName in schema.properties) {
+                var prop = schema.properties[propName];
+                schema.properties[propName] = new Property(this, schema, propName, prop);
+            }
+        }
+    },
+
     prepareData: function() {
         // Ensure that all instances have a _key property.
         for (var schemaName in this.schemas) {
-            this.schemas[schemaName]._name = schemaName;
             var instances = this.data[schemaName];
             for (var key in instances) {
                 instances[key]._key = key;
@@ -327,84 +338,50 @@ Application.methods({
     prepareInstance: function(schemaName, instance) {
         var schema = schemaName && this.schemas[schemaName];
         var properties = schema.properties;
-        var propertyDef, propertyName;
+        var propertyName;
 
         instance._schema = schema;
 
-        // Parse strings into correct property types
+        // Convert JSON storage values to internal storage values (in place)
         for (propertyName in properties) {
-            propertyDef = properties[propertyName];
-            if (propertyDef.type == 'time') {
-                if (typeof(instance[propertyName] == 'string')) {
-                    instance[propertyName] = new Date(dateFromISO('1970-01-01T' +
-                                                                  instance[propertyName]));
-                }
-            }
-        }
-
-        // Convert external object references to direct javascript references
-        for (propertyName in properties) {
-            propertyDef = properties[propertyName];
-            var extSchemaName = propertyDef.type;
-            var extSchema = this.schemas[extSchemaName];
-            if (!extSchema) {
-                continue;
-            }
-            var value = instance[propertyName];
-            if (value == undefined) {
-                continue;
-            }
-            if (typeof(value) == 'string') {
-                instance[propertyName] = this.getInstance(extSchemaName, value);
-                continue;
-            }
-            for (var i = 0; i < value.length; i++) {
-                var val = value[i];
-                value[i] = this.getInstance(extSchemaName, value[i]);
-            }
-        }
-
-        // Evaluate computed properties
-        for (propertyName in properties) {
-            propertyDef = properties[propertyName];
-            if (propertyDef.computed) {
-                instance[propertyName] = this.evalItemExpression(propertyDef.computed,
-                                                                 instance);
-            }
+            var property = properties[propertyName];
+            instance[propertyName] = property.fromJSON(instance[propertyName], instance);
         }
     },
 
     // Render a subset of the properties of an instance.
     renderProperties: function (rc, schemaName, instance, properties) {
         var result = "";
-        var label;
-        var value;
-        var schema = schemaName && this.schemas[schemaName];
+        var schema = this.schemas[schemaName];
 
         for (var i = 0; i < properties.length; i++) {
-            // TODO: Use datatype specific formatting for each property (and mode?)
-            label = properties[i];
-            if (typeof(label) == 'string') {
-                label = label[0].toUpperCase() + label.slice(1);
-                var propertyDef = schema.properties[properties[i]] || STRING_PROPERTY;
-                if (propertyDef.label) {
-                    label = propertyDef.label;
-                }
-
-                value = this.renderProperty(rc, instance[properties[i]], propertyDef,
-                                            instance, schemaName, properties[i]);
-                result += this.templates.propertyLine.format({label: label,
-                                                              value: value,
-                                                              schema: schemaName,
-                                                              id: instance._key,
-                                                              propName: properties[i]});
-            } else if (label.view) {
-                result += this.renderList(rc, label.schema, label.view);
-            } else if (label.command) {
-                result += this.renderCommand(label.schema || schemaName, label.command, instance);
-            } else {
-                console.log("Unknown property", label);
+            var propDef = properties[i];
+            var property = schema && schema.properties[propDef];
+            if (property) {
+                var control = property.renderControl(rc, instance);
+                result += this.templates.propertyLine.format({label: property.label,
+                                                              id: property.getControlId(instance),
+                                                              control: control});
+                continue;
             }
+
+            if (typeof(propDef) == 'string') {
+                console.error("No such property: " + schemaName + '.' + propDef);
+                continue;
+            }
+
+            if (propDef.view) {
+                result += this.renderList(rc, propDef.schema, propDef.view);
+                continue;
+            }
+
+            if (propDef.command) {
+                result += this.renderCommand(propDef.schema || schemaName,
+                                             propDef.command, instance);
+                continue;
+            }
+
+            console.log("Unknown property", label);
         }
         return result;
     },
@@ -412,6 +389,8 @@ Application.methods({
     renderProperty: function(rc, value, propertyDef, instance, schemaName, propName) {
         var schema = this.schemas[propertyDef.type];
         var result;
+        // --here--
+
         if (!schema) {
             // Formatted (string) property
             if (propertyDef.format && typeof(propertyDef.format) == 'string') {
@@ -736,5 +715,162 @@ RenderContext.methods({
                                 id: instance._key,
                                 propName: propName,
                                 content: content});
+    }
+});
+
+var propertyClasses = {
+    'string': Property,
+    'date': DateTimeProperty,
+    'time': DateTimeProperty,
+    'datetime': DateTimeProperty
+};
+
+function createProperty(app, schema, propName, propDef) {
+    var PropClass;
+    var refSchema = app.schemas[propDef.type];
+
+    PropClass = refSchema ? ReferenceProperty : propertyClasses[propDef.type];
+    return new PropClass(app, schema, propName, propDef);
+}
+
+function Property(app, schema, propName, propDef) {
+    this.app = app;
+    this.schema = schema;
+    this.propName = propName;
+    types.extend(this, propDef);
+    this.type = this.type || 'string';
+    if (!this.label) {
+        this.label = propName[0].toUpperCase() + propName.slice(1);
+    }
+}
+
+Property.methods({
+    templates: {
+        read: '<span>{content}</span>',
+        edit: '<input type="text" id="{id}" value="{content}"/>'
+    },
+
+    getControlId: function (instance) {
+        return [this.schema._name, instance._key, this.propName].join('-');
+    },
+
+    getControl: function (instance) {
+        return $('#' + this.getControlId(instance));
+    },
+
+    fromJSON: function (json, instance) {
+        return this.getComputedValue(json, instance);
+    },
+
+    getComputedValue: function (json, instance) {
+        if (this.computed) {
+            json = this.app.evalItemExpression(this.computed, instance);
+        }
+        return json;
+     },
+
+    toJSON: function (value) {
+        return value;
+    },
+
+    fromControl: function (dom) {
+        return this.fromString($(dom).val());
+    },
+
+    toControl: function (dom, value) {
+        $(dom).val(this.toString(value));
+    },
+
+    toForm: function(instance) {
+        var dom = this.getControl(instance);
+        this.toControl(dom, instance[this.propName]);
+    },
+
+    fromFrom: function(instance) {
+        var dom = this.getControl(instance);
+        instance[this.propName] = this.fromControl(dom);
+    },
+
+    fromString: function (value) {
+        return strings.strip(value);
+    },
+
+    toString: function (value) {
+        return value;
+    },
+
+    getTemplate: function(rc) {
+        var templates = this.types[this.type].templates || this.types['string'].templates;
+        return templates[rc.mode] || templates['read'];
+    },
+
+    renderControl: function (rc, instance) {
+        var template = this.getTemplate(rc);
+        return template.format({id: this.getControlId(instance._key)});
+    }
+});
+
+function DateTimeProperty() {
+    Property.call(this);
+}
+
+DateTimeProperty.subclass(Property, {
+    patterns: {
+        date: 'ddd, mmm, d, yyyy',
+        time: 'h:MM tt',
+        datetime: 'ddd, mmm, d, yyyy h:MM tt'
+    },
+
+    fromJSON: function (json) {
+        if (this.type == 'time') {
+            json = '1970-01-01T' + json;
+        }
+        return new Date(dateFromISO(json));
+    },
+
+    toJSON: function (value) {
+        // TODO
+        return value;
+    },
+
+    fromString: function (value) {
+        return value;
+    },
+
+    toString: function (value) {
+        return value.format(this.patterns[this.type], true);
+    }
+});
+
+ReferenceProperty.subclass(Property, {
+    fromJSON: function (json) {
+        var value;
+
+        function getInstance(value) {
+            value = this.app.getInstance(this.type, value);
+            if (!value) {
+                console.log("Could not find " + this.type + "." + value + ".");
+            }
+            return value;
+        }
+
+        if (json == undefined) {
+            return json;
+        }
+
+        if (typeof(json) == 'string') {
+            return getInstance(json);
+        }
+
+        if (!types.isType(json, 'array')) {
+            console.log("Invalid type for " + this.type + " property: " + types.typeOf(json));
+            return undefined;
+        }
+
+        for (var i = 0; i < json.length; i++) {
+            json[i] = getInstance(this.type, json[i]);
+        }
+
+        return json;
     }
 });
