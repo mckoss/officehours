@@ -234,8 +234,7 @@ Application.methods({
             var key = this.getPageKey(schemaName, id, rc.mode);
             result += this.templates.viewPage.format({app: this,
                                                       title: this.renderExpression('{title}',
-                                                                                   instance,
-                                                                                   schemaName),
+                                                                                   instance),
                                                       key: key,
                                                       view: rc.mode,
                                                       buttons: buttons,
@@ -246,9 +245,9 @@ Application.methods({
 
     renderInstance: function(rc, schemaName, view, instance) {
         if (view.format) {
-            return this.renderExpression(view.format, instance, schemaName);
+            return this.renderExpression(view.format, instance);
         }
-        var result = this.renderProperties(rc, schemaName, instance, view.properties);
+        var result = this.renderForm(rc, schemaName, instance, view.properties);
         return result;
     },
 
@@ -300,15 +299,18 @@ Application.methods({
         var instance = this.getInstance(schemaName, id);
         var view = this.getView(schema, 'edit', instance);
         var properties = view.properties;
+
         for (var i = 0; i < properties.length; i++) {
-            var propname = properties[i];
-            if (typeof(propname) != 'string') {
+            if (typeof(properties[i]) != 'string') {
+                continue;
+            }
+            var property = schema[properties[i]];
+            if (!property) {
+                console.error("No such property: " + schemaName + '.' + properties[i]);
                 continue;
             }
 
-            var fieldName = schema._name + '-' + instance._key + '-' + propname;
-            var value = $('#' + fieldName).val();
-            instance[propname] = value;
+            property.fromForm(instance);
         }
         this.updatePages(instance);
     },
@@ -336,21 +338,19 @@ Application.methods({
     },
 
     prepareInstance: function(schemaName, instance) {
-        var schema = schemaName && this.schemas[schemaName];
-        var properties = schema.properties;
-        var propertyName;
+        var schema = this.schemas[schemaName];
 
         instance._schema = schema;
 
         // Convert JSON storage values to internal storage values (in place)
-        for (propertyName in properties) {
+        for (var propertyName in schema.properties) {
             var property = properties[propertyName];
             instance[propertyName] = property.fromJSON(instance[propertyName], instance);
         }
     },
 
     // Render a subset of the properties of an instance.
-    renderProperties: function (rc, schemaName, instance, properties) {
+    renderForm: function (rc, schemaName, instance, properties) {
         var result = "";
         var schema = this.schemas[schemaName];
 
@@ -386,56 +386,11 @@ Application.methods({
         return result;
     },
 
-    renderProperty: function(rc, value, propertyDef, instance, schemaName, propName) {
-        var schema = this.schemas[propertyDef.type];
-        var result;
-        // --here--
-
-        if (!schema) {
-            // Formatted (string) property
-            if (propertyDef.format && typeof(propertyDef.format) == 'string') {
-                result = this.renderExpression(propertyDef.format, instance, schemaName);
-            } else if (types.isType(value, 'date')) {
-                    switch (propertyDef.type) {
-                    case 'date':
-                        result = value.format('ddd, mmm, d, yyyy', true);
-                        break;
-                    case 'time':
-                        result = value.format('h:MM tt', true);
-                        break;
-                    case 'datetime':
-                        result = value.format('ddd, mmm, d, yyyy h:MM tt', true);
-                        break;
-                    }
-            } else if (value == undefined) {
-                result = '';
-            } else {
-                // TODO: Type-specific rendering
-                result = value.toString();
-            }
-
-            return rc.renderField(result, schemaName, instance, propName);
-        }
-
-        // TODO: Render picker's for external item properties.
-
-        if (value == undefined) {
-            return "";
-        }
-
-        if (!types.isType(value, 'array')) {
-            value = [value];
-        }
-
-        result = this.renderList(rc, propertyDef.type, 'list', value);
-        return result;
-    },
-
     renderPage: function (pageId) {
         var page = this.pages[pageId];
         var buttons = this.renderToolbarButtons(page.toolbar);
         var rc = new RenderContext(this);
-        var content = this.renderProperties(rc, undefined, undefined, page.properties);
+        var content = this.renderForm(rc, undefined, undefined, page.properties);
         return this.templates.page.format(types.extend({pageId: pageId,
                                                         app: this,
                                                         buttons: buttons,
@@ -506,7 +461,7 @@ Application.methods({
     // {key1.key2.key3} - nested properties of an object
     // keys can be numbers (0-based index into an array) or
     // property names.
-    renderExpression: function (st, instance, schemaName) {
+    renderExpression: function (st, instance) {
         var self = this;
         if (st == undefined) {
             return "undefined";
@@ -514,34 +469,24 @@ Application.methods({
         var rc = new RenderContext(this, 'expression');
         st = st.toString();
         st = st.replace(reFormat, function(whole, key) {
-            var currentSchemaName = schemaName;
+            // TODO: Support format args
             var currentInstance = instance;
             var value = instance;
             var parts = key.split('|');
             key = string.strip(parts[0]);
             var fmt = string.strip(parts[1]);
             var keys = key.split('.');
-            var propertyDef;
+            var property;
             for (var i = 0; i < keys.length; i++) {
-                key = keys[i];
-                propertyDef = self.schemas[currentSchemaName].properties[key];
-                if (propertyDef.format) {
-                    return self.renderExpression(propertyDef.format, instance, schemaName);
-                }
-                var n = parseInt(key);
-                if (!isNaN(n)) {
-                    value = value[n];
-                } else {
-                    currentInstance = value;
-                    currentSchemaName = propertyDef.type;
-                    value = value[key];
-                }
+                var part = keys[i];
+                property = currentInstance._schema.properties[part];
+                currentInstance = value;
+                value = value[part];
                 if (value == undefined) {
                     return "";
                 }
             }
-            return self.renderProperty(rc, value, propertyDef,
-                                       currentInstance, currentSchemaName, key);
+            return property.toString(value, currentInstance);
         });
         return st;
     },
@@ -777,25 +722,29 @@ Property.methods({
         return this.fromString($(dom).val());
     },
 
-    toControl: function (dom, value) {
-        $(dom).val(this.toString(value));
+    toControl: function (dom, value, instance) {
+        $(dom).val(this.toString(value, instance));
     },
 
     toForm: function(instance) {
         var dom = this.getControl(instance);
-        this.toControl(dom, instance[this.propName]);
+        this.toControl(dom, instance[this.propName], instance);
     },
 
-    fromFrom: function(instance) {
+    fromForm: function(instance) {
         var dom = this.getControl(instance);
         instance[this.propName] = this.fromControl(dom);
     },
 
     fromString: function (value) {
-        return strings.strip(value);
+        return string.strip(value);
     },
 
-    toString: function (value) {
+    // Value and CONTAINER instance (needed for rendered values)
+    toString: function (value, instance) {
+        if (this.format && typeof(this.format) == 'string') {
+            return app.renderExpression(this.format, instance, this.schema._name);
+        }
         return value;
     },
 
