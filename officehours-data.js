@@ -12,7 +12,7 @@
                     title: "pwning Friends at Quoridor",
                     description: "Quoridor is a game that is most fun when you make your friends most frustrated.",
                     owner: "bobby",
-                    date: "2011-2-22",
+                    date: "2011-02-22",
                     time: '15:00',
                     reservations: ["bobby-124-0", "bobby-124-1", "bobby-124-2", "bobby-124-3"]
                 },

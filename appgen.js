@@ -321,7 +321,7 @@ Application.methods({
             schema._name = schemaName;
             for (var propName in schema.properties) {
                 var prop = schema.properties[propName];
-                schema.properties[propName] = new Property(this, schema, propName, prop);
+                schema.properties[propName] = createProperty(this, schema, propName, prop);
             }
         }
     },
@@ -344,7 +344,7 @@ Application.methods({
 
         // Convert JSON storage values to internal storage values (in place)
         for (var propertyName in schema.properties) {
-            var property = properties[propertyName];
+            var property = schema.properties[propertyName];
             instance[propertyName] = property.fromJSON(instance[propertyName], instance);
         }
     },
@@ -665,6 +665,7 @@ RenderContext.methods({
 
 var propertyClasses = {
     'string': Property,
+    'number': Property, // TODO: Custom number property
     'date': DateTimeProperty,
     'time': DateTimeProperty,
     'datetime': DateTimeProperty
@@ -674,7 +675,11 @@ function createProperty(app, schema, propName, propDef) {
     var PropClass;
     var refSchema = app.schemas[propDef.type];
 
-    PropClass = refSchema ? ReferenceProperty : propertyClasses[propDef.type];
+    PropClass = refSchema ? ReferenceProperty : propertyClasses[propDef.type || 'string'];
+    if (!PropClass) {
+        console.error("Unknown property type: " + propDef.type);
+        PropClass = Property;
+    }
     return new PropClass(app, schema, propName, propDef);
 }
 
@@ -760,7 +765,7 @@ Property.methods({
 });
 
 function DateTimeProperty() {
-    Property.call(this);
+    Property.apply(this, arguments);
 }
 
 DateTimeProperty.subclass(Property, {
@@ -771,6 +776,9 @@ DateTimeProperty.subclass(Property, {
     },
 
     fromJSON: function (json) {
+        if (json == undefined) {
+            return undefined;
+        }
         if (this.type == 'time') {
             json = '1970-01-01T' + json;
         }
@@ -791,20 +799,25 @@ DateTimeProperty.subclass(Property, {
     }
 });
 
+function ReferenceProperty() {
+    Property.apply(this, arguments);
+}
+
 ReferenceProperty.subclass(Property, {
     fromJSON: function (json) {
+        var self = this;
         var value;
 
         function getInstance(value) {
-            value = this.app.getInstance(this.type, value);
+            value = self.app.getInstance(self.type, value);
             if (!value) {
-                console.log("Could not find " + this.type + "." + value + ".");
+                console.log("Could not find " + self.type + "." + value + ".");
             }
             return value;
         }
 
         if (json == undefined) {
-            return json;
+            return undefined;
         }
 
         if (typeof(json) == 'string') {
@@ -817,7 +830,7 @@ ReferenceProperty.subclass(Property, {
         }
 
         for (var i = 0; i < json.length; i++) {
-            json[i] = getInstance(this.type, json[i]);
+            json[i] = getInstance(json[i]);
         }
 
         return json;
