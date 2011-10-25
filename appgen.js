@@ -381,7 +381,7 @@ Application.methods({
                 continue;
             }
 
-            console.log("Unknown property", label);
+            console.log("Unknown property", propDef);
         }
         return result;
     },
@@ -621,18 +621,7 @@ function RenderContext(app, mode) {
 RenderContext.methods({
     templates: {
         list: '<ul data-role="listview" data-inset="true">{content}</ul>',
-        listLine: '<li><a href="#{key}">{item}</a></li>',
-
-        fields: {
-            text: {
-                read: '<span>{content}</span>',
-                edit: '<input type="text" id="{schema}-{id}-{propName}" value="{content}"/>'
-            },
-            number: {
-                read: '<span>{content}</span>',
-                edit: '<input type="number" id="{schema}-{id}-{propName}" value="{content}"/>'
-            }
-        }
+        listLine: '<li><a href="#{key}">{item}</a></li>'
     },
 
     renderList: function(a) {
@@ -646,20 +635,6 @@ RenderContext.methods({
             return self.templates.listLine.format(obj);
         });
         return this.templates.list.format({content: a.join('')});
-    },
-
-    renderField: function(content, schemaName, instance, propName) {
-        var schema = this.app.schemas[schemaName];
-        var type = 'text';
-        if (schema && schema.type) {
-            type = schema.type;
-        }
-        var template = this.templates.fields[type][this.mode] ||
-            this.templates.fields[type]['read'];
-        return template.format({schema: schemaName,
-                                id: instance._key,
-                                propName: propName,
-                                content: content});
     }
 });
 
@@ -753,13 +728,8 @@ Property.methods({
         return value;
     },
 
-    getTemplate: function(rc) {
-        var templates = this.types[this.type].templates || this.types['string'].templates;
-        return templates[rc.mode] || templates['read'];
-    },
-
     renderControl: function (rc, instance) {
-        var template = this.getTemplate(rc);
+        var template = this.templates[rc.mode];
         return template.format({id: this.getControlId(instance._key)});
     }
 });
