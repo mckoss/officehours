@@ -486,7 +486,7 @@ Application.methods({
                     return "";
                 }
             }
-            return property.toString(value, currentInstance);
+            return property.getString(currentInstance);
         });
         return st;
     },
@@ -671,7 +671,7 @@ function Property(app, schema, propName, propDef) {
 
 Property.methods({
     templates: {
-        read: '<span>{content}</span>',
+        read: '<span id="{id}">{content}</span>',
         edit: '<input type="text" id="{id}" value="{content}"/>'
     },
 
@@ -723,9 +723,14 @@ Property.methods({
     // Value and CONTAINER instance (needed for rendered values)
     toString: function (value, instance) {
         if (this.format && typeof(this.format) == 'string') {
-            return app.renderExpression(this.format, instance, this.schema._name);
+            return app.renderExpression(this.format, instance);
         }
-        return value;
+        return value.toString();
+    },
+
+    // Get the string value for the current property instance
+    getString: function (instance) {
+        return this.toString(instance[this.propName], instance);
     },
 
     renderControl: function (rc, instance) {
@@ -804,5 +809,9 @@ ReferenceProperty.subclass(Property, {
         }
 
         return json;
+    },
+
+    toString: function (value) {
+        return value._schema.properties['title'].getString(value);
     }
 });
