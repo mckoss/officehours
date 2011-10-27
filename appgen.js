@@ -154,6 +154,7 @@ Application.methods({
     updatePages: function (target) {
         $.mobile.activePage = undefined;
         $('body').html(app.html());
+        app.bindData();
         if (target) {
             window.location.hash = this.getPageKey(target._schema._name, target._key);
         }
@@ -251,6 +252,40 @@ Application.methods({
         return result;
     },
 
+    bindData: function () {
+        var rc = new RenderContext(this);
+
+        // Render all the instances of each schema
+        for (var schemaName in this.schemas) {
+            rc.mode = 'read';
+            this.bindInstances(rc, schemaName);
+            rc.mode = 'edit';
+            this.bindInstances(rc, schemaName);
+        }
+    },
+
+    bindInstances: function (rc, schemaName) {
+        var schema = this.schemas[schemaName];
+        var instances = this.data[schemaName];
+        for (var id in instances) {
+            var instance = instances[id];
+            var key = this.getPageKey(schemaName, id, rc.mode);
+            var form = $('#' + key)[0];
+            if (!form) {
+                continue;
+            }
+            this.bindInstance(rc, instance, form);
+        }
+    },
+
+    bindInstance: function (rc, instance, form) {
+        var properties = instance._schema.properties;
+        for (var propName in properties) {
+            var property = properties[propName];
+            property.toForm(rc, instance, form);
+        }
+    },
+
     renderList: function(rc, schemaName, viewName, instances) {
         var schema = this.schemas[schemaName];
         if (!instances) {
@@ -310,7 +345,8 @@ Application.methods({
                 continue;
             }
 
-            property.fromForm(instance);
+            // TODO: get rc and form
+            property.fromForm(rc, instance, form);
         }
         this.updatePages(instance);
     },
@@ -669,73 +705,108 @@ function Property(app, schema, propName, propDef) {
     }
 }
 
+// Properties handle moving values between 3 locations/formats:
+// 1. JSON persistance
+// 2. Form controls
+// 3. Internal storage (native data format)
+//
+// There are also helper functions that convert a string value to
+// a native value and back (toString and fromString).
 Property.methods({
     templates: {
         read: '<span id="{id}">{content}</span>',
         edit: '<input type="text" id="{id}" value="{content}"/>'
     },
 
+    // The control id for the property (unique per form)
     getControlId: function (instance) {
-        return [this.schema._name, instance._key, this.propName].join('-');
+        return this.propName;
     },
 
-    getControl: function (instance) {
-        return $('#' + this.getControlId(instance));
+    // Find the control inside the current form
+    getControl: function (rc, instance, form) {
+        return $('#' + this.getControlId(instance), form)[0];
     },
 
+    // Convert a JSON-storable format to our internal format
     fromJSON: function (json, instance) {
-        return this.getComputedValue(json, instance);
+        return json;
     },
 
-    getComputedValue: function (json, instance) {
-        if (this.computed) {
-            json = this.app.evalItemExpression(this.computed, instance);
-        }
-        return json;
-     },
-
+    // Convert our internal storage format to a JSON storage format
     toJSON: function (value) {
         return value;
     },
 
+    getValue: function (instance) {
+        if (this.computed) {
+            return this.app.evalItemExpression(this.computed, instance);
+        }
+        return instance[this.propName];
+    },
+
+    // Extract the storage value from a control
     fromControl: function (dom) {
         return this.fromString($(dom).val());
     },
 
-    toControl: function (dom, value, instance) {
-        $(dom).val(this.toString(value, instance));
+    // Put a stored value into the control
+    toControl: function (rc, dom, value, instance) {
+        value = this.toString(value, instance);
+        if (rc.mode == 'read') {
+            $(dom).text(value);
+            return;
+        }
+        $(dom).val(value);
     },
 
-    toForm: function(instance) {
-        var dom = this.getControl(instance);
-        this.toControl(dom, instance[this.propName], instance);
+    // Copy instance storage (or computed value) into form display
+    toForm: function(rc, instance, form) {
+        var dom = this.getControl(rc, instance, form);
+        if (!dom) {
+            return;
+        }
+        this.toControl(rc, dom, this.getValue(instance), instance);
     },
 
-    fromForm: function(instance) {
-        var dom = this.getControl(instance);
+    // Copy control value into instance storage
+    fromForm: function(rc, instance, form) {
+        if (this.computed) {
+            return;
+        }
+        var dom = this.getControl(rc, instance, form);
+        if (!dom) {
+            return;
+        }
         instance[this.propName] = this.fromControl(dom);
     },
 
+    // Parse a string to return a storage value
     fromString: function (value) {
         return string.strip(value);
     },
 
-    // Value and CONTAINER instance (needed for rendered values)
+    // Convert storage value into displayable string.
     toString: function (value, instance) {
+        // Value and CONTAINER instance (needed for rendered values)
         if (this.format && typeof(this.format) == 'string') {
             return app.renderExpression(this.format, instance);
+        }
+        if (!value) {
+            return '';
         }
         return value.toString();
     },
 
     // Get the string value for the current property instance
     getString: function (instance) {
-        return this.toString(instance[this.propName], instance);
+        return this.toString(this.getValue(instance), instance);
     },
 
+    // Return HTML for the control.
     renderControl: function (rc, instance) {
         var template = this.templates[rc.mode];
-        return template.format({id: this.getControlId(instance._key)});
+        return template.format({id: this.getControlId(instance)});
     }
 });
 
@@ -770,6 +841,9 @@ DateTimeProperty.subclass(Property, {
     },
 
     toString: function (value) {
+        if (!value) {
+            return '';
+        }
         return value.format(this.patterns[this.type], true);
     }
 });
@@ -812,6 +886,12 @@ ReferenceProperty.subclass(Property, {
     },
 
     toString: function (value) {
+        if (!value) {
+            return '';
+        }
+        if (types.isType(value, 'array')) {
+            return "TBD - Array";
+        }
         return value._schema.properties['title'].getString(value);
     }
 });
