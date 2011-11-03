@@ -1,0 +1,88 @@
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+<title>KAHNSEPT</title>
+
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0b3/jquery.mobile-1.0b3.min.css" />
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.3.min.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/mobile/1.0b3/jquery.mobile-1.0b3.js"></script>
+
+<script type="text/javascript" src="/lib/beta/js/utils.js"></script>
+<script type="text/javascript" src="/appgen-all.js"></script>
+
+<!--script type="text/javascript" src="kahnsept.js"></script -->
+<script type="text/javascript" src="editor.js"></script>
+<script type="text/javascript" src="officehours-app.js"></script>
+
+
+<script type="text/javascript">
+var editor = namespace.lookup("com.pageforest.kahnsept.editor");
+$(document).ready(editor.onReady);
+</script>
+
+<!--script type="text/javascript" src="http://kahnsept.pageforest.com/docs/cwkoss-kahnsept-database-5597/?callback=editor.loadDatabase"></script-->
+<style>
+div.schemalist {
+background-color:#00FF00;
+width:150px;
+height:100%;
+float:left;
+}
+
+div.schemaDefinitionTitle {
+background-color:#FF0000;
+width:850px;
+height:50px;
+float:left;
+text-align:center;
+}
+
+div.schemaDefinition {
+background-color:#0000FF;
+width:850px;
+
+float:left;
+text-align:center;
+}
+
+div.instanceBox {
+background-color:#FFFF00;
+width:850px;
+height:1000px;
+float:left;
+text-align:left;
+}
+
+div.schemaDefinitionLine {
+background-color:#00FFFF;
+width:850px;
+
+float:left;
+text-align:left;
+}
+
+div.editDeleteButtons {
+background-color:#009900;
+
+float:right;
+}
+
+div.instance {
+background-color:#0000FF;
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="schemalist" id="schemaList"></div>
+
+<div class="schemaDefinitionTitle" id="defTitle"></div>
+
+<div class="schemaDefinition" id="schemaDefinition"></div>
+
+<!--div class="instanceBox" id="instanceBox"></div-->
+
+</body>
+</html>
