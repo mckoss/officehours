@@ -13,6 +13,7 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
     var world;
 
     var selectedSchema = "users";
+    var selectedPage = null;
     var editingProp = null;
     var editingInstNum = null;
     var instances = [];
@@ -39,8 +40,13 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
 
     function display() {
         validateData();
-        displaySchemaList();
-        displaySchemaDefinition();
+        displayPageSchemaList();
+        if(selectedSchema) {
+            displaySchemaDefinition();
+        }
+        if(selectedPage) {
+            displayPageDefinition();
+        }
         //displayInstances();
     };
 
@@ -52,25 +58,43 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
     }
 
 
-    function displaySchemaList() {
-        $("#schemaList").html('<h3>Schema List</h3><ol>');
+    function displayPageSchemaList() {
+        //Schema List
+        var htmlStr = '<h3>Schema List</h3>';
         for(var key in world.schemas) {
             var schema = world.schemas[key];
             if (key == selectedSchema) {
-                $("#schemaList").append('<li>' + capitalize(key) + '</li>');
+                htmlStr += '<li>' + capitalize(key) + '</li>';
             }
             else {
-                $("#schemaList").
-                    append('<li><a href="#" onclick="editor.selectSchema(\'' +
-                           key + '\');">' + capitalize(key) + '</a></li>');
+                 htmlStr += '<li><a href="#" onclick="editor.selectSchema(\'' +
+                           key + '\');">' + capitalize(key) + '</a></li>';
             }
         }
 
-        $("#schemaList").
-            append('</ol><input type="textbox" id="newSchemaName"' +
-                   ' value="New Schema Name" /><br>' +
+         htmlStr +='<input type="textbox" id="newSchemaName"' +
+                   ' value="newSchemaName" /><br>' +
                    '<input type="button" value="Create"' +
-                   ' onclick="editor.createSchema();" />');
+                   ' onclick="editor.createSchema();" />';
+        //Special Pages
+         htmlStr += '<h3>Special Pages</h3>';
+         for(key in world.pages) {
+            if (key == selectedPage) {
+                htmlStr += '<li>' + capitalize(key) + '</li>';
+            }
+            else {
+                 htmlStr += '<li><a href="#" onclick="editor.selectPage(\'' +
+                           key + '\');">' + capitalize(key) + '</a></li>';
+            }             
+         }
+        htmlStr +='<input type="textbox" id="newPageName"' +
+                   ' value="newPageName" /><br>' +
+                   '<input type="button" value="Create"' +
+                   ' onclick="editor.createPage();" />';        
+        htmlStr += '<br><br><br><input type="button" value="Export Data" onclick="' +
+                    'editor.exportData()" />';
+        $("#pageSchemaList").html(htmlStr);
+            
     }
 
     function setSchemaTitleBar(selectedSchema) {
@@ -115,7 +139,13 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
 
         //EDIT MODE
         if (editingProp == propName) {
-            schemaDefStr += '<div class="schemaDefinitionLine">' +
+            schemaDefStr += '<div class="schemaDefinitionLine">';
+            schemaDefStr += '<div class="editDeleteButtons">' +
+                                '<input type="button" value="Save" ' + 
+                                'onclick="editor.saveProp(\'' + propName + 
+                                 '\');" /><input type="button" value="Reset"' +
+                                'onclick="editor.resetProp();" />' +
+                            '</div>' +
                 '<strong>'+ capitalize(propName) + ':</strong><ul>' +
                 '<li>Property Name: <input type="textbox" value="' +
                 propName +
@@ -151,12 +181,6 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
             }
             schemaDefStr += addNewField(prop);
             schemaDefStr += '</ul>';
-            schemaDefStr += '<div class="editDeleteButtons">' +
-                                '<input type="button" value="Save" ' + 
-                                'onclick="editor.saveProp(\'' + propName + 
-                                 '\');" /><input type="button" value="Reset"' +
-                                'onclick="editor.resetProp();" />' +
-                            '</div>';
             schemaDefStr += '</div>';
         }
         else {
@@ -252,131 +276,39 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
         world.schemas[selectedSchema].properties[editingProp][newfield] = "new" + newfield;
         display();
     }
-
-    /*function displayInstances() {
-        $("#instanceBox").empty();
-        var instString = "<ol>";
-        var query = selectedSchema.query();
-        instances = query.fetch();
-        for (var i = 0; i < instances.length; i++) {
-            var instTitle = instances[i].getTitle();
-            if (i == editingInstNum) {
-                instString += ('<li><div class="instance"><div ' +
-                		'class="editDeleteButtons"><input type="button" ' +
-                		'value="Save" onclick="editor.saveInst();" />' + 
-                		'<input type="button" value="Reset" ' +
-                		'onclick="editor.resetInst();" /></div><h3>' + 
-                		instTitle + '</h3><ol>');
-                for (var propName in selectedSchema.props) {
-                    var prop = selectedSchema.props[propName];
-                    if (prop.schemaName == "String" || 
-                    		prop.schemaName == "Number") {
-                        instString += ('<li>' + prop.name + ':  <input id="' +
-                        		propName + 'field" type="textbox" value="' +
-                        		instances[i][prop.name] + '" />');
-                    }
-                    else if (prop.schemaName == "Boolean") {
-                        if (instances[i][prop.name] == "True" || 
-                        		instances[i][prop.name] == "true") {
-                            instString += ('<li>' + prop.name + 
-                            		':  <select id="' + propName + 
-                            		'field"><option value="True" ' +
-                            		'selected="yes">True</option>' +
-                            		'<option value="False">False' +
-                            		'</option></select>');
-                        }
-                        if (instances[i][prop.name] == "False" || 
-                        		instances[i][prop.name] == "false" || 
-                        		instances[i][prop.name] == undefined) {
-                            instString += ('<li>' + prop.name + 
-                            		':  <select id="' + propName + 
-                            		'field"><option value="True">True' +
-                            		'</option><option value="False" ' +
-                            		'selected="yes">False</option></select>');
-                        }
-                    }
-                    else if (prop.schemaName == "Date") {
-                        instString += ('<li>' + prop.name + 
-                        		':  Date picker not yet implemented');
-                    }
-                    else {
-                        instString += ('<li>' + prop.name + ':  <select id="' +
-                        		propName + 
-                        		'field"><option value="undefined">' +
-                        		'undefined</option>');
-                        for (var targetInst in 
-                        		world.schemas[prop.schemaName].instances) {
-                            targetTitle = world.schemas[prop.schemaName].instances[targetInst].getTitle();
-                            if (instances[i][prop.name] == targetTitle) {
-                                instString += ('<option value="' +
-                                		targetTitle + '" selected="yes">' + 
-                                		targetTitle + '</option>');
-                            }
-                            else {
-                                instString += ('<option value="' + 
-                                		targetTitle + '">' + targetTitle +
-                                		'</option>');
-                            }
-                        }
-                        instString += ('</select>');
-                    }
-                }
-                instString += ('</ol></div></li>');
-            }
-            else {
-                instString += ('<li><div class="instance"><div ' +
-                		'class="editDeleteButtons"><input ' + 
-                		'type="button" value="Edit" ' +
-                		'onclick="editor.editInst(' + i + ');" />' + 
-                		'<input type="button" value="Delete" ' +
-                		'onclick="editor.delInst(' + i + 
-                		');" /></div><h3>' + instTitle + '</h3><ol>');
-                for (var propName in selectedSchema.props) {
-                    var prop = selectedSchema.props[propName];
-                    instString += ('<li>' + prop.name + ':  ' +
-                    		instances[i][prop.name]);
-                }
-                instString += ('</ol></div></li>');
-            }
-        }
-        instString += ('<br><input type="button" ' +
-        		'value="Create New Instance" ' +
-        		'onclick="editor.createInst();" />');
-        $("#instanceBox").append(instString);
-    }*/
-    
-
     
     function createSchema() {
-        world.createSchema($("#newSchemaName").val());
+        world.schemas[$("#newSchemaName").val()] = {"properties": {"title": {}}};
+        selectedSchema = $("#newSchemaName").val();
         display();
     };
     
     function selectSchema(schemaName) {
         selectedSchema = schemaName;
+        selectedPage = null;
         editingInstNum = null;
         editingProp = null;
         display();
     };
     
     function deleteSchema() {
-        if (selectedSchema instanceof kahnsept.BuiltIn) {
-            alert("thats a builtin schema- you can't delete it");
-        }
-        else {
-            world.deleteSchema(selectedSchema.name);
-            selectedSchema = world.schemas["Number"];
-            display();
-        }
+        confirm("Are you sure you want to delete this schema?");
+        delete world.schemas[selectedSchema];
+        display();
     };
     
     function addProp() {
         var newPropName = $("#newPropName").val();
         var newPropSchema = $("#newPropSchema").val();
-        var newPropCard = $("#newPropCard").val();
-        var newPropDefault = $("#newPropDefault").val();
-        selectedSchema.addProperty(newPropName, newPropSchema, 
-        		newPropDefault, newPropCard);
+        if(newPropName == undefined || newPropName == "") {
+            alert("You must specify a name for this property");
+            return;
+        }
+        if(hasSpaces(newPropName)) {
+            alert("Property Names cannot contain spaces");
+            return;
+        }
+        world.schemas[selectedSchema].properties[newPropName] = {type: newPropSchema};
         display();
     }
     
@@ -436,7 +368,188 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
         editingProp = null;
         display();
     };
-    /*
+
+    function selectPage(pageName) {
+        selectedPage = pageName;
+        selectedSchema = null;
+        editingInstNum = null;
+        editingProp = null;
+        display();
+    }
+
+    function exportData() {
+        jsonStr = jsonToString(world);
+        console.log(world);
+        console.log(jsonStr);
+    }
+
+    function jsonToString(obj) {
+        var retStr = '{';
+        var items = [];
+        for(var key in obj) {
+            var itemStr = key + ": ";
+            if(typeof(obj[key]) == "string" ||
+                typeof(obj[key]) == "number" ||
+                typeof(obj[key]) == "boolean") {
+                itemStr += '"' + obj[key] + '"';
+            }
+            else {
+                if(Object.prototype.toString.call(obj[key]) === '[object Array]' ){
+                    itemStr += '[';
+                    var elements = [];
+                    for(var i = 0; i < obj[key].length; i++) {
+                        if(typeof(obj[key][i]) === "string") {
+                            elements.push('"' + obj[key][i] + '"'); 
+                        } else {
+                            elements.push(jsonToString(obj[key][i]));
+                        }
+                    }
+                    itemStr += elements.join(", ") + ']';         
+                }
+                else if(Object.prototype.toString.call(obj[key]) === '[object Object]' ){
+                    itemStr += jsonToString(obj[key]);
+                }
+                else if(Object.prototype.toString.call(obj[key]) === '[object Function]') {
+                    console.log("Error: there should not be a function in this");
+                    console.log([key, obj]);
+                } else {
+                    console.log("Error: how did you get here?");
+                    console.log([key, obj]);
+                }
+            }
+            items.push(itemStr);
+        }
+        retStr += items.join(', ') + '}';
+        return retStr;
+    }
+
+    function capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function hasSpaces(str){
+        if(str.search(/\s/) == -1) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    ns.extend({
+        'loadDatabase': loadDatabase,
+        'onReady': onReady,
+        'createSchema': createSchema,
+        'selectSchema': selectSchema,
+        'deleteSchema': deleteSchema,
+        'addProp': addProp,
+        'editProp': editProp,
+        'saveProp': saveProp,
+        'delProp': delProp,
+        'resetProp': resetProp,
+        'addField': addField,
+        'exportData': exportData/*,
+        'editInst': editInst,
+        'delInst': delInst,
+        'saveInst': saveInst,
+        'resetInst': resetInst,
+        'createInst': createInst*/
+    });
+});
+
+    /*function displayInstances() {
+        $("#instanceBox").empty();
+        var instString = "<ol>";
+        var query = selectedSchema.query();
+        instances = query.fetch();
+        for (var i = 0; i < instances.length; i++) {
+            var instTitle = instances[i].getTitle();
+            if (i == editingInstNum) {
+                instString += ('<li><div class="instance"><div ' +
+                        'class="editDeleteButtons"><input type="button" ' +
+                        'value="Save" onclick="editor.saveInst();" />' + 
+                        '<input type="button" value="Reset" ' +
+                        'onclick="editor.resetInst();" /></div><h3>' + 
+                        instTitle + '</h3><ol>');
+                for (var propName in selectedSchema.props) {
+                    var prop = selectedSchema.props[propName];
+                    if (prop.schemaName == "String" || 
+                            prop.schemaName == "Number") {
+                        instString += ('<li>' + prop.name + ':  <input id="' +
+                                propName + 'field" type="textbox" value="' +
+                                instances[i][prop.name] + '" />');
+                    }
+                    else if (prop.schemaName == "Boolean") {
+                        if (instances[i][prop.name] == "True" || 
+                                instances[i][prop.name] == "true") {
+                            instString += ('<li>' + prop.name + 
+                                    ':  <select id="' + propName + 
+                                    'field"><option value="True" ' +
+                                    'selected="yes">True</option>' +
+                                    '<option value="False">False' +
+                                    '</option></select>');
+                        }
+                        if (instances[i][prop.name] == "False" || 
+                                instances[i][prop.name] == "false" || 
+                                instances[i][prop.name] == undefined) {
+                            instString += ('<li>' + prop.name + 
+                                    ':  <select id="' + propName + 
+                                    'field"><option value="True">True' +
+                                    '</option><option value="False" ' +
+                                    'selected="yes">False</option></select>');
+                        }
+                    }
+                    else if (prop.schemaName == "Date") {
+                        instString += ('<li>' + prop.name + 
+                                ':  Date picker not yet implemented');
+                    }
+                    else {
+                        instString += ('<li>' + prop.name + ':  <select id="' +
+                                propName + 
+                                'field"><option value="undefined">' +
+                                'undefined</option>');
+                        for (var targetInst in 
+                                world.schemas[prop.schemaName].instances) {
+                            targetTitle = world.schemas[prop.schemaName].instances[targetInst].getTitle();
+                            if (instances[i][prop.name] == targetTitle) {
+                                instString += ('<option value="' +
+                                        targetTitle + '" selected="yes">' + 
+                                        targetTitle + '</option>');
+                            }
+                            else {
+                                instString += ('<option value="' + 
+                                        targetTitle + '">' + targetTitle +
+                                        '</option>');
+                            }
+                        }
+                        instString += ('</select>');
+                    }
+                }
+                instString += ('</ol></div></li>');
+            }
+            else {
+                instString += ('<li><div class="instance"><div ' +
+                        'class="editDeleteButtons"><input ' + 
+                        'type="button" value="Edit" ' +
+                        'onclick="editor.editInst(' + i + ');" />' + 
+                        '<input type="button" value="Delete" ' +
+                        'onclick="editor.delInst(' + i + 
+                        ');" /></div><h3>' + instTitle + '</h3><ol>');
+                for (var propName in selectedSchema.props) {
+                    var prop = selectedSchema.props[propName];
+                    instString += ('<li>' + prop.name + ':  ' +
+                            instances[i][prop.name]);
+                }
+                instString += ('</ol></div></li>');
+            }
+        }
+        instString += ('<br><input type="button" ' +
+                'value="Create New Instance" ' +
+                'onclick="editor.createInst();" />');
+        $("#instanceBox").append(instString);
+    }*/
+
+        /*
     function editInst(instNum) {
         editingInstNum = instNum;
         display();
@@ -461,7 +574,7 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
             if (editingInstNum != null) {
                 for (var prop in selectedSchema.props) {
                     instances[editingInstNum][prop] = $("#" + 
-                    		prop + "field").val();
+                            prop + "field").val();
                 }
                 editingInstNum = null;
                 display();
@@ -484,27 +597,3 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
             alert(e.message);
         }
     }*/
-
-    function capitalize(str) {
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-
-    ns.extend({
-        'loadDatabase': loadDatabase,
-        'onReady': onReady,
-        'createSchema': createSchema,
-        'selectSchema': selectSchema,
-        'deleteSchema': deleteSchema,
-        'addProp': addProp,
-        'editProp': editProp,
-        'saveProp': saveProp,
-        'delProp': delProp,
-        'resetProp': resetProp,
-        'addField': addField/*,
-        'editInst': editInst,
-        'delInst': delInst,
-        'saveInst': saveInst,
-        'resetInst': resetInst,
-        'createInst': createInst*/
-    });
-});
