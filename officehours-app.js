@@ -12,10 +12,12 @@
 
 Properties in every schema:
 
-id: {type: string},
+**NOT TRUE**id: {type: string},
+
 owner: The creator of an instance.
    Default definition { type: users } (the type cannot be changed).
-short: This property is used to display references to instances.
+
+**NOT TRUE**short: This property is used to display references to instances.
    Default definition is { format: "{title}" }
 
 Optional special properties:

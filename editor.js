@@ -1,3 +1,12 @@
+/*
+Todo: 
+-Special Page editing
+
+Talk to dad about:
+-How do we want to handing the 'format' field?  Right now, 
+    sometimes it is a string, and sometimes it is an object.
+    Is this right? 
+*/
 namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
     var kahnsept = namespace.lookup("com.pageforest.kahnsept");
     var base = namespace.lookup("org.startpad.base");
@@ -86,20 +95,10 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
 	    }
         $("#schemaDefinition").html(schemaDefStr);
         
-	    var dropDownStr = '<select id="newPropSchema">';
-	    for (var key in world.schemas) {
-	        var schema = world.schemas[key];
-	        dropDownStr += ('<option value="' + schema.name + '">' + 
-	        		schema.name + '</option>');
-	    }
-	    dropDownStr += '</select>';
 	    $("#schemaDefinition").append('<div class="schemaDefinitionLine">' +
 	    		'newPropName: <input type="textbox" id="newPropName" '+
-	    		'style="width:100px;">' + ' Type: ' + dropDownStr +
-	    		' Card:<select id="newPropCard" style="width:50px;">' +
-	    		'<option value="one">one</option><option value="many">' + 
-	    		'many</option></select> Default: <input type="textbox" ' +
-	    		'id="newPropDefault">' + '<input type="button" ' +
+	    		'style="width:100px;">' + ' Type: ' + typeSelect(undefined, "newPropType") +
+	    		'<input type="button" ' +
 	    		'value="Add Property" onclick="editor.addProp();" /></div>');
     }
 
@@ -117,7 +116,7 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
         //EDIT MODE
         if (editingProp == propName) {
             schemaDefStr += '<div class="schemaDefinitionLine">' +
-                '<strong>'+propName + ':</strong><ul>' +
+                '<strong>'+ capitalize(propName) + ':</strong><ul>' +
                 '<li>Property Name: <input type="textbox" value="' +
                 propName +
                 '" id="propName" /></li>' +
@@ -146,6 +145,12 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
                 }
                 schemaDefStr += '</li>';
             }
+            if(prop.label && prop.label != "") {
+                schemaDefStr += '<li>Label : <input type="textbox" value="' + prop.label +
+                                '" id="label" /></li>';
+            }
+            schemaDefStr += addNewField(prop);
+            schemaDefStr += '</ul>';
             schemaDefStr += '<div class="editDeleteButtons">' +
                                 '<input type="button" value="Save" ' + 
                                 'onclick="editor.saveProp(\'' + propName + 
@@ -164,8 +169,8 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
                     propName + '\');" /></div>';
             schemaDefStr += '<strong>' + capitalize(propName) + ':</strong>' +
                     '<br><ul><li>Type: ' + prop.type + '</li>';
-            if(prop.label) {
-                schemaDefStr += '<li>Label: ' + prop.label + '</li>';
+            if(prop.computed && prop.computed != "") {
+                schemaDefStr += '<li>Computed: ' + prop.computed + '</li>';
             }
             if(prop.format && prop.format != "") {
                 schemaDefStr += '<li>Format: ';
@@ -185,17 +190,18 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
                 }
                 schemaDefStr += '</li>';
             }
-            if(prop.computed && prop.computed != "") {
-                schemaDefStr += '<li>Computed: ' + prop.computed + '</li>';
+            if(prop.label) {
+                schemaDefStr += '<li>Label: ' + prop.label + '</li>';
             }
             schemaDefStr += '</ul></div>';
         }
         return schemaDefStr;
     }
 
-    function typeSelect(selected) {
+    function typeSelect(selected, customID) {
         var types = ["string", "date", "number", "boolean"];
-        var retStr = '<select id="propType">';
+        customID = customID ? customID : "propType";
+        var retStr = '<select id="'+ customID +'">';
         for(var key in world.schemas) {
             types.push(key);
         }
@@ -208,6 +214,43 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
         }
         retStr += '</select>';
         return retStr;
+    }
+
+    function addNewField(prop) {
+        if(prop.computed && prop.format && prop.label) {
+            return '';
+        }
+        if(!prop.computed) {
+            var computed = '<option value="computed">Computed</option>';
+        } else {
+            var computed = '';
+        }
+        if(!prop.format) {
+            var format = '<option value="format">Format</option>';
+        } else {
+            var format = '';
+        }
+        if(!prop.label) {
+            var label = '<option value="label">Label</option>';
+        } else {
+            var label = '';
+        }
+
+        var retStr = '<li>Add Field: ' + 
+                        '<select id="newfield">' +
+                            computed +
+                            format +
+                            label +
+                        '</select>' +
+                        '<input type="button" value="Add" onclick="editor.addField()" />' +
+                    '</li>';
+        return retStr;
+    }
+
+    function addField() {
+        var newfield = $("#newfield").val();
+        world.schemas[selectedSchema].properties[editingProp][newfield] = "new" + newfield;
+        display();
     }
 
     /*function displayInstances() {
@@ -343,24 +386,47 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
         display();
     };
     function saveProp(oldName) {
-        try {
+        //try {
             var newName = $("#propName").val();
-            var thisSchema = world.schemas[selectedSchema]
+            var thisSchema = world.schemas[selectedSchema];
             if(newName != oldName) {
                 thisSchema.properties[newName] = thisSchema.properties[oldName];
                 delete thisSchema.properties[oldName];
             }
-            console.log([$("#propType").val(), thisSchema.properties[newName].type]);
+
             if($("#propType").val() != thisSchema.properties[newName].type) {
                 thisSchema.properties[newName].type = $("#propType").val();
-                console.log(thisSchema.properties[newName].type);
+            }
+            if($("#format").val() != thisSchema.properties[newName].format) {
+                if($("#format").val() == "" || $("#format").val() == undefined) {
+                    delete thisSchema.properties[newName].format;
+                } 
+                else {
+                    thisSchema.properties[newName].format = $("#format").val();
+                }
+            }
+            if($("#computed").val() != thisSchema.properties[newName].computed) {
+                if($("#computed").val() == "" || $("#computed").val() == undefined) {
+                    delete thisSchema.properties[newName].computed;
+                }
+                else {
+                    thisSchema.properties[newName].computed = $("#computed").val();
+                }
+            }
+            if($("#label").val() != thisSchema.properties[newName].label) {
+                if($("#label").val() == "" || $("#label").val() == undefined) {
+                    delete thisSchema.properties[newName].label;
+                }
+                else {
+                    thisSchema.properties[newName].label = $("#label").val();
+                }
             }
             //console.log(thisSchema.properties[newName]);
             editingProp = null;
             display();
-        } catch (e) {
+        /*} catch (e) {
             alert(e.message);
-        }
+        }*/
     };
     function delProp(propName) {
         selectedSchema.deleteProperty(propName);
@@ -433,7 +499,8 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
         'editProp': editProp,
         'saveProp': saveProp,
         'delProp': delProp,
-        'resetProp': resetProp/*,
+        'resetProp': resetProp,
+        'addField': addField/*,
         'editInst': editInst,
         'delInst': delInst,
         'saveInst': saveInst,
