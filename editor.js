@@ -117,85 +117,78 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
         //EDIT MODE
         if (editingProp == propName) {
             schemaDefStr += '<div class="schemaDefinitionLine">' +
-                'Property Name: <input type="textbox" value="' +
+                '<strong>'+propName + ':</strong><ul>' +
+                '<li>Property Name: <input type="textbox" value="' +
                 propName +
-                '" id="propName" />Type: ' + typeSelect(prop.type);
-            /*    ' Card: <select id="propCard">';
-
-            if (prop.card == "one") {
-                schemaDefStr += '<option value="one" selected="yes">' +
-                    'one</option><option value="many">many</option>';
+                '" id="propName" /></li>' +
+                '<li>Type: ' + typeSelect(prop.type) + '</li>';
+            if(prop.computed && prop.computed != "") {
+                schemaDefStr += '<li>Computed : <input type="textbox" value="' + prop.computed +
+                                '" id="computed" /></li>';
             }
-            else if (prop.card == "many") {
-                schemaDefStr += '<option value="one">one</option>' +
-                    '<option value="many" selected="yes">many</option>';
-            }
-            schemaDefStr += ('</select>Default:');*/
-            if (prop.type == "string" ||
-                prop.type == "number" ||
-                prop.type == "date") {
-                schemaDefStr += '<input type="textbox" value="' +
-                    /*prop.defaultValue + */'" id="propDefault" />';
-            }
-            else if (prop.type == "boolean") {
-                if (prop.defaultValue == "True" ||
-                    prop.defaultValue == "true") {
-                    schemaDefStr += '<select id="propDefault">' +
-                        '<option value="True" selected="yes">' +
-                        'True</option>' +
-                        '<option value="False">False</option></select>';
-                }
-                if (prop.defaultValue == "False" ||
-                    prop.defaultValue == "false" ||
-                    prop.defaultValue == undefined) {
-                    schemaDefStr += '<select id="propDefault">' +
-                        '<option value="True">True</option>' +
-                        '<option value="False"' +
-                        'selected="yes">False</option></select>';
-                }
-            }/* TODO- Schema default select
-            else {
-                schemaDefStr += '<select id="propDefault">' +
-                    '<option value="undefined">undefined</option>';
-                base.forEach(
-                    world.schemas[prop.schemaName].instances,
-                    function(inst) {
-                        var targetTitle = inst.getTitle();
-                        if (prop.defaultValue == targetTitle) {
-                            schemaDefStr += '<option value="' +
-                                targetTitle +
-                                '" selected="yes">' +
-                                targetTitle +
-                                '</option>';
+            if(prop.format && prop.format != "") {
+                schemaDefStr += '<li>Format : ';
+                if(typeof(prop.format) == "object") {
+                    schemaDefStr += '(';
+                    var firsttime = true
+                    for(var key in prop.format){
+                        if(firsttime != true) {
+                            schemaDefStr += ', ';
                         }
-                        else {
-                            schemaDefStr += '<option value="' +
-                                targetTitle +
-                                '">' +
-                                targetTitle +
-                                '</option>';
-                        }
-                    });
-                schemaDefStr += ('</select>');
-            }*/
+                        schemaDefStr += capitalize(key) + ': ' + '<input type="textbox" value="' + 
+                                        prop.format[key] + '" id="format' + key + '" />';
+                        firsttime = false;
+                    }
+                    schemaDefStr += ')';
+                } else {
+                schemaDefStr += '<input type="textbox" value="' + prop.format +
+                                '" id="format" />';
+                }
+                schemaDefStr += '</li>';
+            }
             schemaDefStr += '<div class="editDeleteButtons">' +
-                '<input type="button" value="Save" ' + 
-                'onclick="editor.saveProp(\'' + propName + 
-                '\');" /><input type="button" value="Reset"' +
-                'onclick="editor.resetProp();" /></div></div>';
+                                '<input type="button" value="Save" ' + 
+                                'onclick="editor.saveProp(\'' + propName + 
+                                 '\');" /><input type="button" value="Reset"' +
+                                'onclick="editor.resetProp();" />' +
+                            '</div>';
+            schemaDefStr += '</div>';
         }
         else {
-            schemaDefStr += '<div class="schemaDefinitionLine">' + 
-                    capitalize(propName) + ' : ' + prop.type;
-            if(prop.label) {
-                schemaDefStr += ', Label: ' + prop.label + ' ';
-            }
-
+            //READ MODE
+            schemaDefStr += '<div class="schemaDefinitionLine">';
             schemaDefStr += '<div class="editDeleteButtons"><input type="button"' +
                     'value="Edit" onclick="editor.editProp(\'' + 
                     propName + '\');" /><input type="button" ' + 
                     'value="Delete" onclick="editor.delProp(\'' + 
-                    propName + '\');" /></div></div>';
+                    propName + '\');" /></div>';
+            schemaDefStr += '<strong>' + capitalize(propName) + ':</strong>' +
+                    '<br><ul><li>Type: ' + prop.type + '</li>';
+            if(prop.label) {
+                schemaDefStr += '<li>Label: ' + prop.label + '</li>';
+            }
+            if(prop.format && prop.format != "") {
+                schemaDefStr += '<li>Format: ';
+                if(typeof(prop.format) == "object") {
+                    schemaDefStr += '(';
+                    var firsttime = true;
+                    for(var key in prop.format) {
+                        if(firsttime == false) {
+                            schemaDefStr += ', ';
+                        }
+                        schemaDefStr += capitalize(key) + ': ' + prop.format[key];
+                        firsttime = false;
+                    }
+                    schemaDefStr += ')';
+                } else {
+                schemaDefStr += prop.format;
+                }
+                schemaDefStr += '</li>';
+            }
+            if(prop.computed && prop.computed != "") {
+                schemaDefStr += '<li>Computed: ' + prop.computed + '</li>';
+            }
+            schemaDefStr += '</ul></div>';
         }
         return schemaDefStr;
     }
@@ -213,6 +206,7 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
             }
             retStr +='>' + capitalize(types[i]) + '</option>';
         }
+        retStr += '</select>';
         return retStr;
     }
 
