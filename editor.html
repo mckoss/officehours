@@ -26,6 +26,9 @@ body {
     background-color:#dddddd;
 }
 
+div.superbox {
+    width:1112px;
+}
 
 div.pageSchemaList {
 background-color:#ffffff;
@@ -39,7 +42,7 @@ height:600px;
 float:left;
 }
 
-div.schemaDefinitionTitle {
+div.propertyBoxTitle {
 background-color:#FFFFFF;
 width:850px;
 height:50px;
@@ -52,7 +55,7 @@ float:left;
 text-align:center;
 }
 
-div.schemaDefinition {
+div.propertyBox {
 background-color:#FFFFFF;
 width:850px;
 border-radius: 10px;
@@ -72,7 +75,7 @@ float:left;
 text-align:left;
 }
 
-div.schemaDefinitionLine {
+div.propertyBoxLine {
 width:835px;
 padding: 5px;
 float:left;
@@ -97,11 +100,13 @@ strong {
 
 <body>
 
-<div class="pageSchemaList" id="pageSchemaList"></div>
+<div class="superbox">
+    <div class="pageSchemaList" id="pageSchemaList"></div>
 
-<div class="schemaDefinitionTitle" id="defTitle"></div>
+    <div class="propertyBoxTitle" id="defTitle"></div>
 
-<div class="schemaDefinition" id="schemaDefinition"></div>
+    <div class="propertyBox" id="propertyBox"></div>
+</div>
 
 <!--div class="instanceBox" id="instanceBox"></div-->
 

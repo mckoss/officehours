@@ -51,9 +51,25 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
     };
 
     function validateData() {
-        if(!world.schemas[selectedSchema]) {
+        if(selectedSchema == null && selectedPage == null){
+            console.log("ERROR: no schema or page selected, should be one or other");
+        }
+        if(selectedSchema != null && selectedPage != null){
+            console.log("ERROR: both schema or page selected, should be one or other");
+        }
+        if(selectedSchema != null && !world.schemas[selectedSchema]) {
             console.log("ERROR: selected schema " + selectedSchema + 
                         " does not exist in the data model");
+        }
+        if(selectedPage != null && !world.pages[selectedPage]) {
+            console.log("ERROR: selected page " + selectedPage + 
+                        " does not exist in the data model");
+        }
+
+        for(var key in world.pages) {
+            if(!world.pages[key].title) {
+                console.log("ERROR: all pages must have a title, " + key + "does not.");
+            }
         }
     }
 
@@ -97,9 +113,9 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
             
     }
 
-    function setSchemaTitleBar(selectedSchema) {
+    function setTitleBar(selected) {
         $("#defTitle").html('<h3 style="width:750px; height:45px; float:left;">' +
-               capitalize(selectedSchema) + ' Definition</h3>' +
+               capitalize(selected) + ' Definition</h3>' +
                '<div style="float:left; margin-top:15px;">' +
                '<input type="button" value="Delete" ' +
                'onclick="editor.deleteSchema();" /></div>');
@@ -108,7 +124,7 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
 
     function displaySchemaDefinition() {
 
-    	setSchemaTitleBar(selectedSchema);
+    	setTitleBar(selectedSchema);
 
         var thisSchema = world.schemas[selectedSchema];
 
@@ -117,9 +133,9 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
 	    for (var propName in thisSchema.properties) {
             schemaDefStr += displayProp(propName);
 	    }
-        $("#schemaDefinition").html(schemaDefStr);
+        $("#propertyBox").html(schemaDefStr);
         
-	    $("#schemaDefinition").append('<div class="schemaDefinitionLine">' +
+	    $("#propertyBox").append('<div class="propertyBoxLine">' +
 	    		'newPropName: <input type="textbox" id="newPropName" '+
 	    		'style="width:100px;">' + ' Type: ' + typeSelect(undefined, "newPropType") +
 	    		'<input type="button" ' +
@@ -139,7 +155,7 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
 
         //EDIT MODE
         if (editingProp == propName) {
-            schemaDefStr += '<div class="schemaDefinitionLine">';
+            schemaDefStr += '<div class="propertyBoxLine">';
             schemaDefStr += '<div class="editDeleteButtons">' +
                                 '<input type="button" value="Save" ' + 
                                 'onclick="editor.saveProp(\'' + propName + 
@@ -185,7 +201,7 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
         }
         else {
             //READ MODE
-            schemaDefStr += '<div class="schemaDefinitionLine">';
+            schemaDefStr += '<div class="propertyBoxLine">';
             schemaDefStr += '<div class="editDeleteButtons"><input type="button"' +
                     'value="Edit" onclick="editor.editProp(\'' + 
                     propName + '\');" /><input type="button" ' + 
@@ -377,6 +393,47 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
         display();
     }
 
+    function displayPageDefinition() {
+        setTitleBar(selectedPage);
+        var thisPage = world.pages[selectedPage];
+
+        var buttonStr = '';
+        if(thisPage.toolbar) {
+            for(var key in thisPage.toolbar) {
+                buttonStr += displayToolbarButton(key);
+            }            
+        } else {
+            buttonStr += 'None';
+        }
+        buttonStr += '<input type="button" value="Add another Button" ' + 
+                        'onclick="editor.addButton()" />';
+
+        var defStr = '<div class="propertyBoxLine">' +
+                        '<strong>Page Title: </strong>' +
+                        '<input type="text" value="' + thisPage.title + 
+                            '" id="pageTitle" />' +
+                        '</div>' +
+                    '<div class="propertyBoxLine">' +
+                        '<strong>Toolbar Buttons: </strong><br><br>' +
+                        + buttonStr +
+                    '</div>' + 
+                    '<div class="propertyBoxLine">' +
+                        '<strong>Page Elements: </strong>' +
+                    '</div>';
+        $("#propertyBox").html(defStr);
+    }
+
+    function displayToolbarButton(key) {
+        var thisButton = world.pages[selectedPage].toolbar[key];
+        var retStr = '<strong>' + key + ': </strong><br><ul>' + 
+                        '<li>Label: ' + thisButton.label + '</li>' +
+                        '<li>Condition: ' + thisButton.condition + '</li>' +
+                        '<li>Onclick: ' + thisButton.onclick + '</li>' +
+                        '</ul>';
+        return retStr;
+        
+    }
+
     function exportData() {
         jsonStr = jsonToString(world);
         console.log(world);
@@ -448,7 +505,8 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
         'delProp': delProp,
         'resetProp': resetProp,
         'addField': addField,
-        'exportData': exportData/*,
+        'exportData': exportData, 
+        'selectPage': selectPage/*,
         'editInst': editInst,
         'delInst': delInst,
         'saveInst': saveInst,
