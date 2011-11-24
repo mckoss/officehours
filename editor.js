@@ -24,7 +24,7 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
 
     function onReady() {
     $.ajax({
-        url: "/officehours-app.js",
+        url: "/officehours-app2.js",
         dataType: 'text',
         success: function(data){
             setWorld(data);
@@ -408,6 +408,19 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
         buttonStr += '<input type="button" value="Add another Button" ' + 
                         'onclick="editor.addButton()" />';
 
+        var pageElements = '';
+        for(var i = 0; i < thisPage.elements.length; i++) {
+            pageElements += displayPageElement(i);
+        }
+        pageElements += 'New Element: ' +
+                        '<select id="newPageEle">' +
+                            '<option value="view">Data List</option>' +
+                            '<option value="command">Button</option>' +
+                            '<option value="link">Link</option>' +
+                        '</select>' +
+                        '<input type="button" value="Add" onclick="editor.addPageElement()" />';
+
+
         var defStr = '<div class="propertyBoxLine">' +
                         '<strong>Page Title: </strong>' +
                         '<input type="text" value="' + thisPage.title + 
@@ -415,17 +428,23 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
                         '</div>' +
                     '<div class="propertyBoxLine">' +
                         '<strong>Toolbar Buttons: </strong><br><br>' +
-                        + buttonStr +
+                        buttonStr +
                     '</div>' + 
                     '<div class="propertyBoxLine">' +
-                        '<strong>Page Elements: </strong>' +
+                        '<strong>Page Elements: </strong><br><br>' +
+                        pageElements +
                     '</div>';
         $("#propertyBox").html(defStr);
     }
 
     function displayToolbarButton(key) {
         var thisButton = world.pages[selectedPage].toolbar[key];
-        var retStr = '<strong>' + key + ': </strong><br><ul>' + 
+        var retStr = '<div class="editDeleteButtons"><input type="button"' +
+                    'value="Edit" onclick="editor.editToolbar(\'' + 
+                    key + '\');" /><input type="button" ' + 
+                    'value="Delete" onclick="editor.delToolbar(\'' + 
+                    key + '\');" /></div>';
+        retStr += '<strong>' + key + ': </strong><br><ul>' + 
                         '<li>Label: ' + thisButton.label + '</li>' +
                         '<li>Condition: ' + thisButton.condition + '</li>' +
                         '<li>Onclick: ' + thisButton.onclick + '</li>' +
@@ -434,50 +453,41 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
         
     }
 
-    function exportData() {
-        jsonStr = jsonToString(world);
-        console.log(world);
-        console.log(jsonStr);
+    function editToolbar(key) {
+        
     }
 
-    function jsonToString(obj) {
-        var retStr = '{';
-        var items = [];
-        for(var key in obj) {
-            var itemStr = key + ": ";
-            if(typeof(obj[key]) == "string" ||
-                typeof(obj[key]) == "number" ||
-                typeof(obj[key]) == "boolean") {
-                itemStr += '"' + obj[key] + '"';
-            }
-            else {
-                if(Object.prototype.toString.call(obj[key]) === '[object Array]' ){
-                    itemStr += '[';
-                    var elements = [];
-                    for(var i = 0; i < obj[key].length; i++) {
-                        if(typeof(obj[key][i]) === "string") {
-                            elements.push('"' + obj[key][i] + '"'); 
-                        } else {
-                            elements.push(jsonToString(obj[key][i]));
-                        }
-                    }
-                    itemStr += elements.join(", ") + ']';         
-                }
-                else if(Object.prototype.toString.call(obj[key]) === '[object Object]' ){
-                    itemStr += jsonToString(obj[key]);
-                }
-                else if(Object.prototype.toString.call(obj[key]) === '[object Function]') {
-                    console.log("Error: there should not be a function in this");
-                    console.log([key, obj]);
-                } else {
-                    console.log("Error: how did you get here?");
-                    console.log([key, obj]);
-                }
-            }
-            items.push(itemStr);
+    function displayPageElement(pos) {
+        var thisEle = world.pages[selectedPage].elements[pos];
+        var retStr = '';
+        if(thisEle.list) {
+            retStr += 'Data List: <br><ul>' + 
+                        '<li>Schema: ' + thisEle.schema + '</li>' +
+                        '<li>Filter: ' + thisEle.list + '</li>' +
+                        '</ul>';
         }
-        retStr += items.join(', ') + '}';
+        if(thisEle.command) {
+            retStr += 'Button: <br><ul>' + 
+                        '<li>Schema: ' + thisEle.schema + '</li>' +
+                        '<li>Command: ' + thisEle.command + '</li>' +
+                        '</ul>';
+        }        
+        if(thisEle.link) {
+            retStr += 'Link: <br><ul>' + 
+                        '<li>Target: ' + thisEle.link + '</li>' +
+                        '</ul>';
+        }
         return retStr;
+    }
+
+    function addPageElement() {
+        alert("worked");
+    }
+
+    function exportData() {
+        jsonStr = JSON.stringify(world);
+        console.log(world);
+        console.log(jsonStr);
     }
 
     function capitalize(str) {
@@ -506,7 +516,8 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
         'resetProp': resetProp,
         'addField': addField,
         'exportData': exportData, 
-        'selectPage': selectPage/*,
+        'selectPage': selectPage,
+        'addPageElement': addPageElement/*,
         'editInst': editInst,
         'delInst': delInst,
         'saveInst': saveInst,
@@ -654,4 +665,45 @@ namespace.lookup('com.pageforest.kahnsept.editor').defineOnce(function(ns) {
         } catch (e) {
             alert(e.message);
         }
+    }*/
+
+
+    /*function jsonToString(obj) {
+        var retStr = '{';
+        var items = [];
+        for(var key in obj) {
+            var itemStr = key + ": ";
+            if(typeof(obj[key]) == "string" ||
+                typeof(obj[key]) == "number" ||
+                typeof(obj[key]) == "boolean") {
+                itemStr += '"' + obj[key] + '"';
+            }
+            else {
+                if(Object.prototype.toString.call(obj[key]) === '[object Array]' ){
+                    itemStr += '[';
+                    var elements = [];
+                    for(var i = 0; i < obj[key].length; i++) {
+                        if(typeof(obj[key][i]) === "string") {
+                            elements.push('"' + obj[key][i] + '"'); 
+                        } else {
+                            elements.push(jsonToString(obj[key][i]));
+                        }
+                    }
+                    itemStr += elements.join(", ") + ']';         
+                }
+                else if(Object.prototype.toString.call(obj[key]) === '[object Object]' ){
+                    itemStr += jsonToString(obj[key]);
+                }
+                else if(Object.prototype.toString.call(obj[key]) === '[object Function]') {
+                    console.log("Error: there should not be a function in this");
+                    console.log([key, obj]);
+                } else {
+                    console.log("Error: how did you get here?");
+                    console.log([key, obj]);
+                }
+            }
+            items.push(itemStr);
+        }
+        retStr += items.join(', ') + '}';
+        return retStr;
     }*/
